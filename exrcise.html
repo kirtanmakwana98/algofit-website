@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALGOFIT - Exercise Guide & Workouts</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bgDark: '#0a0a0c',
+                        cardDark: '#14161b',
+                        cardHover: '#1a1d24',
+                        borderDark: '#232730',
+                        cyanAccent: '#00c6ff',
+                        greenAccent: '#10b981',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+
+        .text-gradient {
+    background: linear-gradient(135deg, #00c6ff 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    background-clip: text; /* Standard property for cross-browser compatibility */
+    -webkit-text-fill-color: transparent;
+}
+        body {
+            background-color: #0a0a0c;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #232730;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00c6ff;
+        }
+
+        /* Gradient Text Utility */
+        
+
+        /* Glow border effects */
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(135deg, rgba(0,198,255,0.3), rgba(16,185,129,0.3));
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .glow-border:hover::before {
+            opacity: 1;
+        }
+
+        .modal-blur {
+            backdrop-filter: blur(10px);
+        }
+
+
+
+
+        .heros-image {
+    width: 100%;
+    margin-top: 25px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #292d36;
+    background: #0a0a0c;
+}
+
+.heros-image img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyanAccent selection:text-black">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-bgDark/90 backdrop-blur-md border-b border-borderDark px-4 lg:px-8 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex flex-col items-center md:items-start">
+                <a href="#" class="text-3xl font-extrabold tracking-wider text-gradient">ALGOFIT</a>
+                <span class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Exercise Guide | Master Every Movement</span>
+            </div>
+            <div>
+                <a href="index.html" class="text-lg font-semibold text-cyanAccent hover:text-cyanAccent/80">HOME</a>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-80">
+                <input type="text" id="searchInput" placeholder="Search exercise or muscle..." 
+                    class="w-full bg-cardDark border border-borderDark text-sm rounded-xl px-4 py-2.5 pl-10 text-white placeholder-gray-500 focus:outline-none focus:border-cyanAccent transition">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 flex-1 w-full">
+        
+        <!-- Category Filter Pills -->
+        <div class="mb-8 overflow-x-auto pb-2 scrollbar-none">
+            <div class="flex items-center space-x-2 min-w-max" id="filterContainer">
+                <!-- Dynamic Pill Buttons -->
+            </div>
+        </div>
+
+        <!-- Exercise Cards Grid -->
+        <div id="exerciseGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Dynamic Exercise Cards -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="noResults" class="hidden text-center py-20">
+            <svg class="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-300">No matching exercises found</h3>
+            <p class="text-gray-500 mt-1">Try selecting another filter or adjusting your search term.</p>
+        </div>
+    </main>
+
+    <!-- Exercise Detail Modal Drawer -->
+    <div id="exerciseModal" class="fixed inset-0 z-50 hidden modal-blur bg-black/75 flex items-center justify-center p-4 lg:p-6 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-cardDark border border-borderDark rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-borderDark bg-cardHover/50">
+                <div class="flex items-center space-x-3">
+                    <span id="modalCategoryBadge" class="text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30"></span>
+                    <h2 id="modalTitle" class="text-2xl font-bold text-white tracking-wide"></h2>
+                </div>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white bg-borderDark/50 hover:bg-borderDark p-2 rounded-xl transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-8 flex-1">
+                
+                <!-- Pure Text Specs Summary Header -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-bgDark/80 p-5 rounded-xl border border-borderDark">
+                    <div>
+                        <span class="text-xs text-gray-400 uppercase font-semibold tracking-wider block mb-1">Primary Target</span>
+                        <p id="modalPrimaryMuscle" class="text-lg font-bold text-cyanAccent"></p>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 uppercase font-semibold tracking-wider block mb-1">Secondary Supporting</span>
+                        <div id="modalSecondaryMuscles" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 uppercase font-semibold tracking-wider block mb-1">Movement Classification</span>
+                        <p id="modalCategoryType" class="text-sm font-semibold text-gray-300 capitalize"></p>
+                    </div>
+                </div>
+
+                <!-- Execution Step-by-Step Instructions -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-cyanAccent inline-block"></span>
+                        <span>Step-by-Step Execution Guide</span>
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="modalStepsContainer">
+                        <!-- Step blocks populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Embedded Dynamic Exercise Calculator -->
+                <div class="border-t border-borderDark pt-6">
+                    <div class="bg-gradient-to-br from-cardHover to-bgDark border border-borderDark rounded-xl p-6 relative overflow-hidden">
+                        <div id="calculatorTitle" class="text-lg font-bold text-white mb-2 flex items-center justify-between">
+                            <!-- Title injected dynamically -->
+                        </div>
+                        <p id="calculatorSubtitle" class="text-xs text-gray-400 mb-6"></p>
+
+                        <!-- Calculator Input Fields -->
+                        <div id="calculatorForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                            <!-- Dynamic Inputs -->
+                        </div>
+
+                        <!-- Calculator Results Cards -->
+                        <div id="calculatorResults" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <!-- Dynamic Calculations -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <section>
+        <div class="heros-image">
+    <img src=images/fitness-banner.png alt="Fitness training">
+</div>
+        
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-borderDark bg-bgDark py-6 mt-12 text-center text-xs text-gray-500">
+        <p>&copy; 2026 <span class="text-gradient font-bold">ALGOFIT</span>. Precision Fitness Guide & Exercise Calculators.</p>
+    </footer>
+
+    <script>
+        // Clean Icon Generator
+        function getCategoryIcon(cat) {
+            const icons = {
+                'LEGS': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+                'CHEST': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`,
+                'BACK': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>`,
+                'SHOULDER': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/></svg>`,
+                'ARMS': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>`,
+                'ABS': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>`,
+                'GLUTES': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`,
+                'FULL BODY': `<svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V7.865"/></svg>`
+            };
+            return icons[cat] || icons['LEGS'];
+        }
+
+        // Master Dataset (Textual focus only)
+        const EXERCISES = [
+            // LEGS
+            {
+                id: 'squat-barbell',
+                title: 'Squat (Barbell)',
+                category: 'LEGS',
+                primaryMuscle: 'Quadriceps',
+                secondaryMuscles: ['Glutes', 'Hamstrings', 'Lower Back'],
+                type: 'compound',
+                steps: {
+                    setup: 'Position barbell on upper traps. Unrack and step back. Set feet shoulder-width apart with toes turned out 15 degrees.',
+                    initiate: 'Inhale into abdomen, brace core tightly, and break at hips and knees simultaneously.',
+                    descent: 'Lower under control until thighs break parallel with the floor while keeping chest tall.',
+                    ascent: 'Drive firmly through mid-foot, extending knees and hips together back to top lock.'
+                }
+            },
+            {
+                id: 'leg-press',
+                title: 'Leg Press (Machine)',
+                category: 'LEGS',
+                primaryMuscle: 'Quadriceps',
+                secondaryMuscles: ['Glutes', 'Hamstrings'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Sit firmly in press seat with lower back flat against pad. Place feet shoulder-width apart on footplate.',
+                    initiate: 'Release safety levers and control the sled weight with extended legs.',
+                    descent: 'Slowly lower platform until knees reach a 90-degree angle without rounding lower spine.',
+                    ascent: 'Press platform back up through midfoot. Avoid locking out knees violently at top.'
+                }
+            },
+            {
+                id: 'leg-curl-lying',
+                title: 'Leg Curl (Lying)',
+                category: 'LEGS',
+                primaryMuscle: 'Hamstrings',
+                secondaryMuscles: ['Calves', 'Glutes'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Lie face down on machine bench with pad rested comfortably just above lower Achilles tendons.',
+                    initiate: 'Grasp handle grips tightly and press hips down firmly against the bench.',
+                    descent: 'Curl legs upward towards glutes, squeezing hamstrings hard at peak flex.',
+                    ascent: 'Slowly lower lever pad back to starting position under continuous resistance.'
+                }
+            },
+            {
+                id: 'lunges-dumbbell',
+                title: 'Lunges (Dumbbell)',
+                category: 'LEGS',
+                primaryMuscle: 'Quadriceps',
+                secondaryMuscles: ['Glutes', 'Hamstrings', 'Calves'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Stand upright holding dumbbells at sides with neutral grip. Maintain tall posture.',
+                    initiate: 'Take a controlled step forward with lead foot.',
+                    descent: 'Lower back knee toward floor until front thigh is parallel to ground.',
+                    ascent: 'Push off front foot firmly to return back to starting standing position.'
+                }
+            },
+            {
+                id: 'romanian-deadlift',
+                title: 'Romanian Deadlift (Barbell)',
+                category: 'LEGS',
+                primaryMuscle: 'Hamstrings',
+                secondaryMuscles: ['Glutes', 'Erector Spinae'],
+                type: 'compound',
+                steps: {
+                    setup: 'Stand tall holding barbell with overhand grip at hip height with soft knee flex.',
+                    initiate: 'Hinge back at hips, pushing tailbone backward while maintaining flat spine.',
+                    descent: 'Lower bar close along shins until deep hamstring stretch is felt below knees.',
+                    ascent: 'Drive hips forward and contract glutes forcefully to stand upright.'
+                }
+            },
+            {
+                id: 'bulgarian-split-squat',
+                title: 'Bulgarian Split Squat',
+                category: 'LEGS',
+                primaryMuscle: 'Quadriceps',
+                secondaryMuscles: ['Glutes', 'Adductors'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Place rear foot elevated on bench behind you. Step front foot out into lunge stride.',
+                    initiate: 'Keep torso upright over front working leg.',
+                    descent: 'Lower rear knee towards floor until front thigh reaches parallel.',
+                    ascent: 'Drive back up through front heel to complete repetition.'
+                }
+            },
+            {
+                id: 'calf-raises',
+                title: 'Calf Raises (Barbell)',
+                category: 'LEGS',
+                primaryMuscle: 'Gastrocnemius',
+                secondaryMuscles: ['Soleus'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Place balls of feet on elevated ledge with heels hanging off edge.',
+                    initiate: 'Lower heels down deep to achieve full stretch in calf muscle flex.',
+                    descent: 'Drive up high on toes as far as possible, squeezing calves at top.',
+                    ascent: 'Hold peak contraction for 1 second before lowering slowly.'
+                }
+            },
+
+            // CHEST
+            {
+                id: 'bench-press-flat',
+                title: 'Flat Bench Press',
+                category: 'CHEST',
+                primaryMuscle: 'Pectoralis Major',
+                secondaryMuscles: ['Anterior Deltoids', 'Triceps Brachii'],
+                type: 'compound',
+                steps: {
+                    setup: 'Lie flat on bench, eyes under bar. Plant feet firmly, pull shoulder blades back and down.',
+                    initiate: 'Grip bar slightly wider than shoulder-width. Unrack bar directly over chest.',
+                    descent: 'Lower bar with control to lower sternum with elbows angled at ~45 degrees.',
+                    ascent: 'Press bar up and slightly back toward shoulder level until arms reach lockout.'
+                }
+            },
+            {
+                id: 'incline-dumbbell-press',
+                title: 'Incline Dumbbell Press',
+                category: 'CHEST',
+                primaryMuscle: 'Upper Pectoralis',
+                secondaryMuscles: ['Anterior Deltoids', 'Triceps'],
+                type: 'compound',
+                steps: {
+                    setup: 'Set bench to 30-45 degree incline. Position dumbbells over upper chest.',
+                    initiate: 'Brace core and press dumbbells straight up over upper chest.',
+                    descent: 'Lower weights under control widening elbows until chest stretch is felt.',
+                    ascent: 'Press dumbbells back up over chest in smooth arc.'
+                }
+            },
+            {
+                id: 'chest-flyes',
+                title: 'Chest Flyes (Cable/DB)',
+                category: 'CHEST',
+                primaryMuscle: 'Pectoralis Major',
+                secondaryMuscles: ['Anterior Deltoids'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Lie on flat bench or stand at cable machine with arms extended wide and slight elbow bend.',
+                    initiate: 'Maintain fixed elbow bend throughout entire movement arc.',
+                    descent: 'Lower arms out wide until deep chest stretch occurs.',
+                    ascent: 'Contract pecs to hug arms back together over center line.'
+                }
+            },
+
+            // BACK
+            {
+                id: 'bent-over-row',
+                title: 'Bent-Over Barbell Row',
+                category: 'BACK',
+                primaryMuscle: 'Latissimus Dorsi',
+                secondaryMuscles: ['Rhomboids', 'Rear Deltoids', 'Biceps'],
+                type: 'compound',
+                steps: {
+                    setup: 'Hold barbell overhand, hinge forward at hips until torso is nearly parallel to floor.',
+                    initiate: 'Keep spine flat and core engaged with bar hanging directly below shoulders.',
+                    descent: 'Row bar towards belly button, driving elbows back and squeezing shoulder blades.',
+                    ascent: 'Lower barbell back under control to full arm stretch.'
+                }
+            },
+            {
+                id: 'lat-pulldown',
+                title: 'Lat Pulldown',
+                category: 'BACK',
+                primaryMuscle: 'Latissimus Dorsi',
+                secondaryMuscles: ['Biceps', 'Brachialis'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Sit in machine with thighs secured. Grip bar wider than shoulder width.',
+                    initiate: 'Lean torso back slightly (10-15 degrees) and depress shoulder blades.',
+                    descent: 'Pull bar down toward upper chest, driving elbows down and back.',
+                    ascent: 'Slowly extend arms upward to feel full lat stretch at top.'
+                }
+            },
+
+            // SHOULDER
+            {
+                id: 'overhead-press',
+                title: 'Overhead Barbell Press',
+                category: 'SHOULDER',
+                primaryMuscle: 'Anterior Deltoids',
+                secondaryMuscles: ['Triceps', 'Upper Chest', 'Core'],
+                type: 'compound',
+                steps: {
+                    setup: 'Rack bar at collarbone height. Grip shoulder-width with forearms vertical.',
+                    initiate: 'Unrack, step back, squeeze glutes, and tuck chin back slightly.',
+                    descent: 'Press bar straight upward vertically close to face.',
+                    ascent: 'Lower bar smoothly back to upper chest rest position.'
+                }
+            },
+            {
+                id: 'lateral-raises',
+                title: 'Dumbbell Lateral Raises',
+                category: 'SHOULDER',
+                primaryMuscle: 'Lateral Deltoids',
+                secondaryMuscles: ['Trapezius'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Stand tall holding dumbbells at sides with slight bend in elbows.',
+                    initiate: 'Raise arms out to sides in wide arc leading with elbows.',
+                    descent: 'Lift until arms reach shoulder height (parallel to floor).',
+                    ascent: 'Lower dumbbells slowly back down resisting gravity.'
+                }
+            },
+
+            // ARMS
+            {
+                id: 'bicep-curl-barbell',
+                title: 'Barbell Bicep Curl',
+                category: 'ARMS',
+                primaryMuscle: 'Biceps Brachii',
+                secondaryMuscles: ['Brachialis', 'Forearms'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Stand upright holding barbell underhand shoulder-width apart.',
+                    initiate: 'Keep elbows tucked tightly to sides of torso.',
+                    descent: 'Curl bar upward toward shoulders through biceps contraction.',
+                    ascent: 'Lower bar slowly down until arms reach full extension.'
+                }
+            },
+            {
+                id: 'tricep-pushdown',
+                title: 'Tricep Rope Pushdown',
+                category: 'ARMS',
+                primaryMuscle: 'Triceps Brachii',
+                secondaryMuscles: ['Forearms'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Attach rope to high pulley. Stand close, bend elbows at 90 degrees.',
+                    initiate: 'Keep upper arms locked vertically beside ribcage.',
+                    descent: 'Push rope down, extending elbows completely and spreading rope ends.',
+                    ascent: 'Allow cable to raise hands back to chest height smoothly.'
+                }
+            },
+
+            // ABS
+            {
+                id: 'hanging-leg-raises',
+                title: 'Hanging Leg Raises',
+                category: 'ABS',
+                primaryMuscle: 'Lower Abdominals',
+                secondaryMuscles: ['Hip Flexors', 'Grip'],
+                type: 'isolation',
+                steps: {
+                    setup: 'Hang from pull-up bar with straight arms and legs together.',
+                    initiate: 'Brace abdomen and avoid swinging momentum.',
+                    descent: 'Raise legs straight out in front until parallel to floor.',
+                    ascent: 'Lower legs slowly back to vertical hang under control.'
+                }
+            },
+
+            // GLUTES
+            {
+                id: 'hip-thrusts',
+                title: 'Barbell Hip Thrusts',
+                category: 'GLUTES',
+                primaryMuscle: 'Gluteus Maximus',
+                secondaryMuscles: ['Hamstrings', 'Quadriceps'],
+                type: 'compound',
+                steps: {
+                    setup: 'Upper back rested against bench, padded barbell across hip crease.',
+                    initiate: 'Feet flat on floor shoulder-width apart.',
+                    descent: 'Drive through heels, extending hips upward until torso and thighs form straight line.',
+                    ascent: 'Lower hips back toward floor with controlled tempo.'
+                }
+            },
+
+            // FULL BODY
+            {
+                id: 'deadlift-conventional',
+                title: 'Deadlift (Conventional)',
+                category: 'FULL BODY',
+                primaryMuscle: 'Posterior Chain',
+                secondaryMuscles: ['Glutes', 'Hamstrings', 'Erector Spinae', 'Traps'],
+                type: 'compound',
+                steps: {
+                    setup: 'Stand with feet hip-width under bar (bar over midfoot). Hinge down to grip bar.',
+                    initiate: 'Pull chest up, pull slack out of bar, and lock lats tight.',
+                    descent: 'Drive floor away with legs, keeping bar close to body as hips rise.',
+                    ascent: 'Stand tall locking hips at top; hinge back to lower bar safely.'
+                }
+            }
+        ];
+
+        const CATEGORIES = ['ALL', 'SHOULDER', 'BACK', 'LEGS', 'CHEST', 'ARMS', 'ABS', 'GLUTES', 'FULL BODY'];
+
+        let activeCategory = 'ALL';
+        let searchQuery = '';
+
+        const filterContainer = document.getElementById('filterContainer');
+        const exerciseGrid = document.getElementById('exerciseGrid');
+        const noResults = document.getElementById('noResults');
+        const searchInput = document.getElementById('searchInput');
+
+        const exerciseModal = document.getElementById('exerciseModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCategoryBadge = document.getElementById('modalCategoryBadge');
+        const modalPrimaryMuscle = document.getElementById('modalPrimaryMuscle');
+        const modalSecondaryMuscles = document.getElementById('modalSecondaryMuscles');
+        const modalCategoryType = document.getElementById('modalCategoryType');
+        const modalStepsContainer = document.getElementById('modalStepsContainer');
+        const calculatorTitle = document.getElementById('calculatorTitle');
+        const calculatorSubtitle = document.getElementById('calculatorSubtitle');
+        const calculatorForm = document.getElementById('calculatorForm');
+        const calculatorResults = document.getElementById('calculatorResults');
+
+        function renderFilters() {
+            filterContainer.innerHTML = CATEGORIES.map(cat => {
+                const isActive = cat === activeCategory;
+                return `
+                    <button onclick="setCategory('${cat}')" 
+                        class="px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-200 uppercase tracking-wider ${
+                            isActive 
+                            ? 'bg-gradient-to-r from-cyanAccent to-greenAccent text-black shadow-lg shadow-cyanAccent/20 scale-105' 
+                            : 'bg-cardDark text-gray-400 border border-borderDark hover:text-white hover:border-gray-600'
+                        }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        window.setCategory = function(cat) {
+            activeCategory = cat;
+            renderFilters();
+            renderGrid();
+        };
+
+        function renderGrid() {
+            const filtered = EXERCISES.filter(item => {
+                const matchesCat = activeCategory === 'ALL' || item.category === activeCategory;
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      item.primaryMuscle.toLowerCase().includes(searchQuery.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                exerciseGrid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            exerciseGrid.innerHTML = filtered.map(ex => `
+                <div onclick="openExerciseModal('${ex.id}')" 
+                    class="glow-border bg-cardDark border border-borderDark rounded-2xl p-5 flex flex-col justify-between cursor-pointer hover:bg-cardHover transition duration-300 group">
+                    <div>
+                        <!-- Header / Type Badge -->
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md bg-bgDark text-cyanAccent border border-cyanAccent/20 flex items-center space-x-1.5">
+                                ${getCategoryIcon(ex.category)}
+                                <span>${ex.category}</span>
+                            </span>
+                            <span class="text-[10px] font-semibold text-gray-400 capitalize bg-bgDark px-2 py-0.5 rounded border border-borderDark">
+                                ${ex.type}
+                            </span>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="text-lg font-bold text-white group-hover:text-cyanAccent transition mb-3">${ex.title}</h3>
+
+                        <!-- Specs -->
+                        <div class="space-y-1 text-xs">
+                            <p class="text-gray-400">
+                                <span class="text-gray-500 font-medium">Primary:</span> 
+                                <span class="text-gray-200 font-semibold">${ex.primaryMuscle}</span>
+                            </p>
+                            <p class="text-gray-400 truncate">
+                                <span class="text-gray-500 font-medium">Secondary:</span> 
+                                <span class="text-gray-400">${ex.secondaryMuscles.join(', ')}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Footer Action Callout -->
+                    <div class="mt-6 pt-3 border-t border-borderDark/60 flex items-center justify-between text-xs text-cyanAccent font-semibold">
+                        <span>View Details & Calc</span>
+                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.openExerciseModal = function(id) {
+            const ex = EXERCISES.find(e => e.id === id);
+            if (!ex) return;
+
+            modalTitle.innerText = ex.title;
+            modalCategoryBadge.innerText = ex.category;
+            modalPrimaryMuscle.innerText = ex.primaryMuscle;
+            modalCategoryType.innerText = `${ex.type} Lift`;
+
+            modalSecondaryMuscles.innerHTML = ex.secondaryMuscles.map(m => 
+                `<span class="text-xs bg-bgDark border border-borderDark text-gray-300 px-2.5 py-1 rounded-md font-medium">${m}</span>`
+            ).join('');
+
+            modalStepsContainer.innerHTML = `
+                <div class="bg-bgDark p-4 rounded-xl border border-borderDark">
+                    <span class="text-xs font-bold text-cyanAccent tracking-wider uppercase block mb-1">1. Setup</span>
+                    <p class="text-xs text-gray-300 leading-relaxed">${ex.steps.setup}</p>
+                </div>
+                <div class="bg-bgDark p-4 rounded-xl border border-borderDark">
+                    <span class="text-xs font-bold text-cyanAccent tracking-wider uppercase block mb-1">2. Initiate</span>
+                    <p class="text-xs text-gray-300 leading-relaxed">${ex.steps.initiate}</p>
+                </div>
+                <div class="bg-bgDark p-4 rounded-xl border border-borderDark">
+                    <span class="text-xs font-bold text-cyanAccent tracking-wider uppercase block mb-1">3. Descent</span>
+                    <p class="text-xs text-gray-300 leading-relaxed">${ex.steps.descent}</p>
+                </div>
+                <div class="bg-bgDark p-4 rounded-xl border border-borderDark">
+                    <span class="text-xs font-bold text-cyanAccent tracking-wider uppercase block mb-1">4. Ascent / Lockout</span>
+                    <p class="text-xs text-gray-300 leading-relaxed">${ex.steps.ascent}</p>
+                </div>
+            `;
+
+            buildCalculator(ex);
+
+            exerciseModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
+
+        function buildCalculator(ex) {
+            if (ex.type === 'compound') {
+                calculatorTitle.innerHTML = `
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-cyanAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        <span>1RM & Training Intensity Estimator</span>
+                    </span>
+                    <span class="text-xs font-semibold text-cyanAccent bg-cyanAccent/10 px-2.5 py-0.5 rounded border border-cyanAccent/30">Compound Metrics</span>
+                `;
+                calculatorSubtitle.innerText = 'Calculate estimated 1 Rep Max and targeted training load targets based on recent set performance.';
+
+                calculatorForm.innerHTML = `
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Lifted Weight (kg)</label>
+                        <input type="number" id="calcWeight" value="100" min="1" max="500" class="w-full bg-bgDark border border-borderDark rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyanAccent">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Reps Performed</label>
+                        <input type="number" id="calcReps" value="5" min="1" max="30" class="w-full bg-bgDark border border-borderDark rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyanAccent">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="calculate1RM()" class="w-full bg-gradient-to-r from-cyanAccent to-greenAccent text-black font-bold py-2 px-4 rounded-lg text-sm hover:opacity-90 transition">
+                            Calculate 1RM
+                        </button>
+                    </div>
+                `;
+
+                calculate1RM();
+
+            } else {
+                calculatorTitle.innerHTML = `
+                    <span class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-greenAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Total Volume & Energy Burn Calculator</span>
+                    </span>
+                    <span class="text-xs font-semibold text-greenAccent bg-greenAccent/10 px-2.5 py-0.5 rounded border border-greenAccent/30">Hypertrophy Metrics</span>
+                `;
+                calculatorSubtitle.innerText = 'Estimate total workout tonnage and calories burned for this isolation exercise set.';
+
+                calculatorForm.innerHTML = `
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Weight / Resistance (kg)</label>
+                        <input type="number" id="calcVolWeight" value="25" min="0" max="300" class="w-full bg-bgDark border border-borderDark rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyanAccent">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Reps Per Set</label>
+                        <input type="number" id="calcVolReps" value="12" min="1" max="100" class="w-full bg-bgDark border border-borderDark rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyanAccent">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Number of Sets</label>
+                        <input type="number" id="calcVolSets" value="4" min="1" max="20" class="w-full bg-bgDark border border-borderDark rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyanAccent">
+                    </div>
+                `;
+
+                document.getElementById('calcVolWeight').addEventListener('input', calculateVolume);
+                document.getElementById('calcVolReps').addEventListener('input', calculateVolume);
+                document.getElementById('calcVolSets').addEventListener('input', calculateVolume);
+
+                calculateVolume();
+            }
+        }
+
+        window.calculate1RM = function() {
+            const w = parseFloat(document.getElementById('calcWeight')?.value) || 0;
+            const r = parseFloat(document.getElementById('calcReps')?.value) || 0;
+
+            if (w <= 0 || r <= 0) return;
+
+            const oneRM = r === 1 ? w : Math.round(w * (1 + r / 30));
+            const target85 = Math.round(oneRM * 0.85);
+            const target70 = Math.round(oneRM * 0.70);
+
+            calculatorResults.innerHTML = `
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">Estimated 1RM</span>
+                    <span class="text-2xl font-extrabold text-gradient">${oneRM} <span class="text-sm font-normal text-gray-400">kg</span></span>
+                </div>
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">85% 1RM (5-Rep Target)</span>
+                    <span class="text-xl font-bold text-cyanAccent">${target85} <span class="text-xs font-normal text-gray-400">kg</span></span>
+                </div>
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">70% 1RM (10-Rep Target)</span>
+                    <span class="text-xl font-bold text-greenAccent">${target70} <span class="text-xs font-normal text-gray-400">kg</span></span>
+                </div>
+            `;
+        };
+
+        window.calculateVolume = function() {
+            const w = parseFloat(document.getElementById('calcVolWeight')?.value) || 0;
+            const r = parseFloat(document.getElementById('calcVolReps')?.value) || 0;
+            const s = parseFloat(document.getElementById('calcVolSets')?.value) || 0;
+
+            const totalVolume = Math.round(w * r * s);
+            const estCalories = Math.round((s * r * 0.85) + (totalVolume * 0.012));
+
+            calculatorResults.innerHTML = `
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">Total Workload Tonnage</span>
+                    <span class="text-2xl font-extrabold text-gradient">${totalVolume.toLocaleString()} <span class="text-sm font-normal text-gray-400">kg</span></span>
+                </div>
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">Total Reps Completed</span>
+                    <span class="text-xl font-bold text-cyanAccent">${s * r} <span class="text-xs font-normal text-gray-400">reps</span></span>
+                </div>
+                <div class="bg-bgDark p-3.5 rounded-xl border border-borderDark text-center">
+                    <span class="text-[11px] text-gray-400 block uppercase tracking-wider font-medium">Est. Calories Burned</span>
+                    <span class="text-xl font-bold text-greenAccent">~${estCalories} <span class="text-xs font-normal text-gray-400">kcal</span></span>
+                </div>
+            `;
+        };
+
+        // Event Listeners
+        closeModalBtn.addEventListener('click', () => {
+            exerciseModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+
+        exerciseModal.addEventListener('click', (e) => {
+            if (e.target === exerciseModal) {
+                exerciseModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderGrid();
+        });
+
+        window.onload = function() {
+            renderFilters();
+            renderGrid();
+        };
+    </script>
+</body>
+</html>

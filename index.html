@@ -1,0 +1,4064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ALGOFIT - Smart fitness calculators and protein food database">
+<title>ALGOFIT | Fitness Calculators</title>
+
+<style>
+/* =========================================================
+   ALGOFIT - GLOBAL STYLES
+========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg: #0a0a0c;
+    --card: #14161b;
+    --card2: #1a1d24;
+    --border: #292d36;
+    --text: #f5f7fa;
+    --muted: #9299a6;
+    --blue: #00c6ff;
+    --blue2: #0072ff;
+    --green: #10b981;
+    --cyan: #00f2fe;
+    --lime: #a3ff12;
+    --danger: #ff5c5c;
+    --gradient: linear-gradient(135deg, #00c6ff, #0072ff, #10b981);
+    --gradient2: linear-gradient(135deg, #00f2fe, #4facfe);
+    --radius: 18px;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(0,198,255,.07), transparent 25%),
+        radial-gradient(circle at 90% 10%, rgba(16,185,129,.05), transparent 25%),
+        var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(10,10,12,.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.navbar {
+    max-width: 1400px;
+    margin: auto;
+    min-height: 76px;
+    padding: 0 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.logo span {
+    color: white;
+}
+
+.nav-links {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn {
+    border: 0;
+    color: #aeb5c1;
+    background: transparent;
+    padding: 11px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    transition: .25s;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    color: white;
+    background: rgba(0,198,255,.09);
+}
+
+.nav-btn.active {
+    box-shadow: inset 0 -2px 0 #00c6ff;
+}
+
+.mobile-menu {
+    display: none;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: white;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main {
+    max-width: 1400px;
+    margin: auto;
+    padding: 40px 25px 70px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+    animation: pageIn .35s ease;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.page-heading {
+    text-align: center;
+    margin: 15px 0 32px;
+}
+
+.page-heading .eyebrow {
+    color: var(--cyan);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 3px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.page-heading h1 {
+    font-size: clamp(32px, 5vw, 58px);
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: -2px;
+}
+
+.page-heading h1 span {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.page-heading p {
+    color: var(--muted);
+    margin-top: 14px;
+    font-size: 16px;
+}
+
+/* =========================================================
+   HERO GYM BANNER
+========================================================= */
+
+.gym-banner {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    margin-bottom: 38px;
+    background:
+        radial-gradient(circle at 50% 100%, rgba(0,198,255,.12), transparent 40%),
+        linear-gradient(180deg, #101218, #090a0d);
+}
+
+.gym-banner::before {
+    content: "";
+    position: absolute;
+    left: 4%;
+    right: 4%;
+    bottom: 31px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #33404c, #00c6ff, #33404c, transparent);
+}
+
+.gym-floor {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 31px;
+    background: #0d0f13;
+    border-top: 1px solid #252b33;
+}
+
+.gym-art {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 85px;
+    padding-bottom: 34px;
+    opacity: .8;
+}
+
+.weight {
+    width: 75px;
+    height: 75px;
+    border: 7px solid #33404c;
+    border-radius: 50%;
+    position: relative;
+}
+
+.weight::after {
+    content: "";
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 4px solid #00c6ff;
+    border-radius: 50%;
+    top: 16px;
+    left: 16px;
+}
+
+.bar {
+    width: 210px;
+    height: 7px;
+    background: #607080;
+    position: absolute;
+    bottom: 70px;
+    border-radius: 20px;
+}
+
+.bar::before,
+.bar::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 75px;
+    background: #35414d;
+    top: -34px;
+    border-radius: 4px;
+}
+
+.bar::before {
+    left: 20px;
+}
+
+.bar::after {
+    right: 20px;
+}
+
+.treadmill {
+    width: 170px;
+    height: 60px;
+    border-bottom: 7px solid #3a4651;
+    transform: skew(-15deg);
+    position: relative;
+}
+
+.treadmill::before {
+    content: "";
+    position: absolute;
+    width: 7px;
+    height: 80px;
+    background: #3a4651;
+    right: 25px;
+    bottom: 0;
+    transform: skew(15deg);
+}
+
+.treadmill::after {
+    content: "";
+    position: absolute;
+    width: 70px;
+    height: 7px;
+    background: #00c6ff;
+    right: 10px;
+    top: -20px;
+}
+
+/* =========================================================
+   CALCULATOR GRID
+========================================================= */
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 18px;
+}
+
+.section-title h2 {
+    font-size: 22px;
+}
+
+.section-title span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.calculator-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+/* =========================================================
+   CALCULATOR CARD
+========================================================= */
+
+.calc-card {
+    background: linear-gradient(145deg, rgba(26,29,36,.96), rgba(16,18,23,.96));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+    transition: .3s ease;
+}
+
+.calc-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,198,255,.35);
+    box-shadow: 0 15px 45px rgba(0,0,0,.25);
+}
+
+.calc-card::before {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: rgba(0,198,255,.05);
+    filter: blur(30px);
+    top: -30px;
+    right: -30px;
+    border-radius: 50%;
+}
+
+.calc-number {
+    color: #6d7683;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.calc-icon {
+    width: 43px;
+    height: 43px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    background: rgba(0,198,255,.08);
+    border: 1px solid rgba(0,198,255,.15);
+    font-size: 20px;
+    margin-bottom: 14px;
+}
+
+.calc-card h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.calc-card > p {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    min-height: 36px;
+    margin-bottom: 17px;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field.full {
+    grid-column: 1 / -1;
+}
+
+.field label {
+    color: #aeb5c1;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    background: #0d0f13;
+    color: white;
+    border: 1px solid #2a3039;
+    border-radius: 9px;
+    padding: 10px 11px;
+    outline: none;
+    font-size: 12px;
+    transition: .2s;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #00c6ff;
+    box-shadow: 0 0 0 3px rgba(0,198,255,.07);
+}
+
+.field select option {
+    background: #15171c;
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+.calculate-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    margin-top: 13px;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #00c6ff, #0072ff 55%, #10b981);
+    transition: .25s;
+}
+
+.calculate-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.result-box {
+    display: none;
+    margin-top: 13px;
+    padding: 13px;
+    background: rgba(0,198,255,.06);
+    border: 1px solid rgba(0,198,255,.18);
+    border-radius: 10px;
+}
+
+.result-box.show {
+    display: block;
+    animation: resultIn .25s ease;
+}
+
+@keyframes resultIn {
+    from {
+        opacity: 0;
+        transform: scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.result-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.result-value {
+    font-size: 21px;
+    font-weight: 900;
+    margin-top: 3px;
+    background: var(--gradient2);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.result-sub {
+    color: #9ea6b3;
+    font-size: 11px;
+    margin-top: 4px;
+    line-height: 1.4;
+}
+
+/* =========================================================
+   PROTEIN FOOD PAGE
+========================================================= */
+
+.food-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.food-header h1 {
+    font-size: clamp(34px, 5vw, 58px);
+    letter-spacing: -2px;
+}
+
+.food-header h1 span {
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.food-header p {
+    color: var(--muted);
+    margin-top: 10px;
+}
+
+.filter-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 28px;
+}
+
+.filter-btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: #aeb5c1;
+    border-radius: 50px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    color: white;
+    border-color: #00c6ff;
+    background: rgba(0,198,255,.08);
+}
+
+.food-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.food-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: .3s;
+}
+
+.food-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,198,255,.3);
+}
+
+.food-top {
+    min-height: 115px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        radial-gradient(circle, rgba(0,198,255,.12), transparent 55%),
+        #101218;
+    font-size: 54px;
+}
+
+.food-info {
+    padding: 16px;
+}
+
+.food-info h3 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.food-category {
+    color: #00c6ff;
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 13px;
+}
+
+.nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
+}
+
+.nutrition {
+    background: #0e1014;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.nutrition small {
+    display: block;
+    color: #747d89;
+    font-size: 9px;
+}
+
+.nutrition strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer {
+    border-top: 1px solid var(--border);
+    padding: 25px;
+    text-align: center;
+    color: #606875;
+    font-size: 12px;
+}
+
+footer strong {
+    color: #00c6ff;
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: #171a20;
+    border: 1px solid #303640;
+    padding: 13px 18px;
+    border-radius: 10px;
+    color: white;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(15px);
+    transition: .3s;
+    z-index: 3000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1150px) {
+    .calculator-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .food-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 750px) {
+    .navbar {
+        min-height: 68px;
+        padding: 0 16px;
+    }
+
+    .logo {
+        font-size: 23px;
+    }
+
+    .mobile-menu {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 12px;
+        right: 12px;
+        padding: 10px;
+        background: #111318;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        flex-direction: column;
+    }
+
+    .nav-links.open {
+        display: flex;
+    }
+
+    .nav-btn {
+        width: 100%;
+        text-align: left;
+    }
+
+    main {
+        padding: 28px 14px 50px;
+    }
+
+    .gym-banner {
+        height: 145px;
+    }
+
+    .gym-art {
+        transform: scale(.7);
+        gap: 35px;
+    }
+
+    .calculator-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .food-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .page-heading h1,
+    .food-header h1 {
+        font-size: 32px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field.full {
+        grid-column: auto;
+    }
+
+    .food-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gym-banner {
+        height: 125px;
+    }
+}
+
+
+
+
+
+
+
+/* =========================================================
+   CALCULATOR SEARCH
+========================================================= */
+
+.calculator-header {
+    gap: 20px;
+}
+
+.calculator-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 380px;
+    background: #0d0f13;
+    border: 1px solid #292d36;
+    border-radius: 12px;
+    padding: 0 13px;
+    transition: .25s;
+}
+
+.calculator-search:focus-within {
+    border-color: #00c6ff;
+    box-shadow: 0 0 0 3px rgba(0,298,255,.07);
+}
+
+.calculator-search span {
+    font-size: 25px;
+    color: #77808c;
+}
+
+.calculator-search input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 11px 0;
+    font-size: 18px;
+}
+
+.calculator-search input::placeholder {
+    color: #68717e;
+}
+
+/* Hidden calculator when search doesn't match */
+
+.calc-card.search-hidden {
+    display: none;
+}
+
+@media (max-width: 700px) {
+
+    .calculator-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .calculator-search {
+        width: 100%;
+    }
+
+}
+
+
+
+
+
+
+
+.hero-image {
+    width: 100%;
+    max-width: 1200px;
+    height: 420px;
+    margin: 25px auto 40px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #292d36;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+
+
+/* =========================================================
+   ABOUT ALGOFIT
+========================================================= */
+
+.about-algofit {
+    margin-top: 80px;
+    padding: 70px 0;
+    border-top: 1px solid #20242c;
+}
+
+/* Header */
+
+.about-header {
+    max-width: 750px;
+    margin: 0 auto 45px;
+    text-align: center;
+}
+
+.about-tag {
+    display: inline-block;
+    margin-bottom: 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #00c6ff;
+}
+
+.about-header h2 {
+    margin: 0 0 18px;
+    font-size: 34px;
+    font-weight: 800;
+    color: #f5f7fa;
+}
+
+.about-header p {
+    margin: 0;
+    color: #9299a6;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+
+/* Information Cards */
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.about-card {
+    padding: 28px 22px;
+    background: linear-gradient(
+        145deg,
+        #14161b,
+        #101216
+    );
+    border: 1px solid #292d36;
+    border-radius: 16px;
+    transition: .3s ease;
+}
+
+.about-card:hover {
+    transform: translateY(-5px);
+    border-color: #00c6ff;
+    box-shadow: 0 12px 35px rgba(0,198,255,.08);
+}
+
+.about-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 20px;
+
+    border-radius: 12px;
+    background: #0d2029;
+
+    font-size: 22px;
+}
+
+.about-card h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #f5f7fa;
+}
+
+.about-card p {
+    margin: 0;
+    color: #9299a6;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+
+/* Real Life Section */
+
+.real-life-box {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 45px;
+
+    margin-top: 35px;
+    padding: 35px;
+
+    border-radius: 18px;
+    border: 1px solid #292d36;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(0,198,255,.08),
+            transparent 40%
+        ),
+        #111318;
+}
+
+.real-life-box h3 {
+    margin: 5px 0 15px;
+    font-size: 24px;
+    color: #f5f7fa;
+}
+
+.real-life-box p {
+    margin: 0;
+    color: #9299a6;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+
+/* Real Life Points */
+
+.real-life-points {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.real-life-points div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    padding: 14px;
+
+    border-radius: 10px;
+    background: #171a20;
+    border: 1px solid #252a33;
+}
+
+.real-life-points strong {
+    color: #00c6ff;
+    font-size: 12px;
+}
+
+.real-life-points span {
+    color: #dce1e7;
+    font-size: 12px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 900px) {
+
+    .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .real-life-box {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .about-algofit {
+        padding: 50px 0;
+    }
+
+    .about-header h2 {
+        font-size: 27px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .real-life-box {
+        padding: 25px;
+    }
+}
+
+
+
+
+
+/* =========================================================
+   TRAINING PROGRESS GRAPH
+========================================================= */
+
+.progress-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: #11151b;
+    border: 1px solid #293542;
+    border-radius: 18px;
+}
+
+/* Header */
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.progress-tag {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #00c6ff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.progress-header h2 {
+    margin: 0 0 8px;
+    color: #f5f7fa;
+    font-size: 25px;
+}
+
+.progress-header p {
+    margin: 0;
+    color: #9299a6;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Summary */
+
+.progress-summary {
+    min-width: 150px;
+    padding: 15px 20px;
+    border: 1px solid #293542;
+    border-radius: 12px;
+    background: #151a21;
+    text-align: right;
+}
+
+.progress-summary span {
+    display: block;
+    margin-bottom: 5px;
+    color: #9299a6;
+    font-size: 10px;
+}
+
+.progress-summary strong {
+    color: #00c6ff;
+    font-size: 26px;
+}
+
+/* Chart */
+
+.progress-chart-box {
+    padding: 20px;
+    background: #0c1117;
+    border: 1px solid #26323d;
+    border-radius: 14px;
+}
+
+.chart-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.chart-title span:first-child {
+    color: #f5f7fa;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#goalDisplay {
+    color: #10b981;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#progressChart {
+    width: 100%;
+    height: 300px;
+    display: block;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .progress-section {
+        padding: 20px;
+    }
+
+    .progress-header {
+        flex-direction: column;
+    }
+
+    .progress-summary {
+        width: 100%;
+        text-align: left;
+    }
+
+    .progress-chart-box {
+        padding: 12px;
+    }
+
+    #progressChart {
+        height: 250px;
+    }
+}
+
+
+
+
+
+
+/* =========================================================
+   TRAINING PROGRESS GRAPH
+========================================================= */
+
+.progress-section {
+    margin-top: 50px;
+    padding: 30px;
+    background: #11151b;
+    border: 1px solid #293542;
+    border-radius: 18px;
+}
+
+/* Header */
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.progress-tag {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #00c6ff;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.progress-header h2 {
+    margin: 0 0 8px;
+    color: #f5f7fa;
+    font-size: 25px;
+}
+
+.progress-header p {
+    margin: 0;
+    color: #9299a6;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Summary */
+
+.progress-summary {
+    min-width: 150px;
+    padding: 15px 20px;
+    border: 1px solid #293542;
+    border-radius: 12px;
+    background: #151a21;
+    text-align: right;
+}
+
+.progress-summary span {
+    display: block;
+    margin-bottom: 5px;
+    color: #9299a6;
+    font-size: 10px;
+}
+
+.progress-summary strong {
+    color: #00c6ff;
+    font-size: 26px;
+}
+
+/* Chart */
+
+.progress-chart-box {
+    padding: 20px;
+    background: #0c1117;
+    border: 1px solid #26323d;
+    border-radius: 14px;
+}
+
+.chart-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.chart-title span:first-child {
+    color: #f5f7fa;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#goalDisplay {
+    color: #10b981;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+#progressChart {
+    width: 100%;
+    height: 300px;
+    display: block;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .progress-section {
+        padding: 20px;
+    }
+
+    .progress-header {
+        flex-direction: column;
+    }
+
+    .progress-summary {
+        width: 100%;
+        text-align: left;
+    }
+
+    .progress-chart-box {
+        padding: 12px;
+    }
+
+    #progressChart {
+        height: 250px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
+<header>
+    <nav class="navbar">
+
+        <div class="logo">ALGO<span>FIT</span></div>
+
+        <div class="nav-links" id="navLinks">
+            <button class="nav-btn active" data-page="home">
+                Home / Calculators
+            </button>
+
+            <button class="nav-btn" data-page="food">
+                Protein Food
+            </button>
+
+            <a href="exrcise.html"><button class="nav-btn" data-page="exercise">
+    Exercises
+</button></a>
+           
+
+            </button>
+        </div>
+
+        <button class="mobile-menu" id="mobileMenu">☰</button>
+
+    </nav>
+</header>
+
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
+<main>
+
+<!-- =======================================================
+     PAGE 1 - CALCULATORS
+======================================================= -->
+
+<section id="homePage" class="page active">
+
+    <div class="page-heading">
+        <div class="eyebrow">ALGOFIT FITNESS SYSTEM</div>
+
+        <h1>
+            ALL FITNESS <span>CALCULATORS</span>
+        </h1>
+
+        
+    </div>
+
+
+    <!-- GYM BANNER -->
+    <!-- =========================================================
+     TRAINING PROGRESS GRAPH
+========================================================= -->
+
+
+
+
+<div class="progress-calculator">
+
+    <h2>Calculate Your Progress</h2>
+
+    <div class="progress-inputs">
+
+        <div class="field">
+            <label>YOUR GOAL</label>
+            <select id="goal">
+                <option value="Muscle Gain">Muscle Gain</option>
+                <option value="Weight Loss">Weight Loss</option>
+                <option value="Strength">Strength</option>
+                <option value="Maintenance">Maintenance</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>CURRENT WEIGHT</label>
+            <input id="weight" type="number" value="82">
+        </div>
+
+        <div class="field">
+            <label>HEIGHT</label>
+            <input id="height" type="number" value="185">
+        </div>
+
+        <div class="field">
+            <label>AGE</label>
+            <input id="age" type="number" value="30">
+        </div>
+
+        <div class="field">
+            <label>EXPERIENCE</label>
+            <select id="experience">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate" selected>Intermediate</option>
+                <option value="Advanced">Advanced</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>BODY FAT %</label>
+            <input id="bodyFat" type="number" value="15">
+        </div>
+
+    </div>
+
+    <!-- THIS IS YOUR BUTTON -->
+    <button
+        class="calculate-btn"
+        onclick="generateProgressGraph()">
+        CALCULATE PROGRESS
+    </button>
+
+</div>
+
+
+<section class="progress-section">
+
+    <div class="progress-header">
+
+        <div>
+            <span class="progress-tag">
+                YOUR FITNESS PROGRESS
+            </span>
+
+            <h2>Training Intensity Progression</h2>
+
+            <p>
+                Your estimated training intensity based on
+                your fitness information.
+            </p>
+        </div>
+
+        <div class="progress-summary">
+            <span>Current Intensity</span>
+            <strong id="currentIntensity">0%</strong>
+        </div>
+
+    </div>
+
+    <div class="progress-chart-box">
+
+        <div class="chart-title">
+            <span>Training Intensity</span>
+            <span id="goalDisplay">Muscle Gain</span>
+        </div>
+
+        <canvas id="progressChart"></canvas>
+
+    </div>
+
+</section>
+
+     
+
+
+    <div class="section-title calculator-header">
+    <div>
+        <h2>Fitness Calculators</h2>
+        <span>19 Smart Tools</span>
+    </div>
+
+    <div class="calculator-search">
+        <span>🔍</span>
+        <input
+            type="text"
+            id="calculatorSearch"
+            placeholder="Search calculator..."
+        >
+    </div>
+</div>
+
+
+    <div class="calculator-grid">
+
+
+<!-- =========================================================
+     TRAINING PROGRESS GRAPH
+========================================================= -->
+
+
+
+
+<!-- =====================================================
+     1 BMI
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">01 / BODY</div>
+
+    <div class="calc-icon">⚖️</div>
+
+    <h3>BMI Calculator</h3>
+
+    <p>
+        Calculate your Body Mass Index and weight category.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Height (cm)</label>
+            <input id="bmiHeight" type="number" placeholder="175">
+        </div>
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="bmiWeight" type="number" placeholder="70">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateBMI()">
+        Calculate BMI
+    </button>
+
+    <div class="result-box" id="bmiResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     2 BMR
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">02 / METABOLISM</div>
+
+    <div class="calc-icon">🔥</div>
+
+    <h3>BMR Calculator</h3>
+
+    <p>
+        Estimate calories your body burns at rest.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Age</label>
+            <input id="bmrAge" type="number" placeholder="21">
+        </div>
+
+        <div class="field">
+            <label>Gender</label>
+            <select id="bmrGender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Height (cm)</label>
+            <input id="bmrHeight" type="number" placeholder="175">
+        </div>
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="bmrWeight" type="number" placeholder="70">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateBMR()">
+        Calculate BMR
+    </button>
+
+    <div class="result-box" id="bmrResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     3 TDEE
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">03 / ENERGY</div>
+
+    <div class="calc-icon">⚡</div>
+
+    <h3>TDEE Calculator</h3>
+
+    <p>
+        Calculate your total daily energy expenditure.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>BMR</label>
+            <input id="tdeeBmr" type="number" placeholder="1700">
+        </div>
+
+        <div class="field">
+            <label>Activity</label>
+            <select id="tdeeActivity">
+                <option value="1.2">Sedentary</option>
+                <option value="1.375">Light</option>
+                <option value="1.55">Moderate</option>
+                <option value="1.725">Heavy</option>
+                <option value="1.9">Extreme</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateTDEE()">
+        Calculate TDEE
+    </button>
+
+    <div class="result-box" id="tdeeResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     4 DAILY CALORIES
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">04 / CALORIES</div>
+
+    <div class="calc-icon">🍽️</div>
+
+    <h3>Daily Calorie Calculator</h3>
+
+    <p>
+        Find your daily calorie target based on your goal.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>TDEE</label>
+            <input id="dailyTdee" type="number" placeholder="2400">
+        </div>
+
+        <div class="field">
+            <label>Goal</label>
+            <select id="dailyGoal">
+                <option value="0">Maintain</option>
+                <option value="-250">Mild Weight Loss</option>
+                <option value="-500">Weight Loss</option>
+                <option value="300">Weight Gain</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateDailyCalories()">
+        Calculate Calories
+    </button>
+
+    <div class="result-box" id="dailyResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     5 DEFICIT
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">05 / FAT LOSS</div>
+
+    <div class="calc-icon">📉</div>
+
+    <h3>Calorie Deficit</h3>
+
+    <p>
+        Estimate daily calorie reduction for weight loss.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field full">
+            <label>Weight Loss Rate (kg/week)</label>
+            <input id="deficitRate" type="number" step=".1" placeholder="0.5">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateDeficit()">
+        Calculate Deficit
+    </button>
+
+    <div class="result-box" id="deficitResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     6 SURPLUS
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">06 / MUSCLE GAIN</div>
+
+    <div class="calc-icon">📈</div>
+
+    <h3>Calorie Surplus</h3>
+
+    <p>
+        Estimate additional calories for weight gain.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field full">
+            <label>Muscle Gain Rate (kg/week)</label>
+            <input id="surplusRate" type="number" step=".1" placeholder="0.25">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateSurplus()">
+        Calculate Surplus
+    </button>
+
+    <div class="result-box" id="surplusResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     7 PROTEIN
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">07 / PROTEIN</div>
+
+    <div class="calc-icon">🥩</div>
+
+    <h3>Protein Calculator</h3>
+
+    <p>
+        Calculate your recommended daily protein intake.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="proteinWeight" type="number" placeholder="70">
+        </div>
+
+        <div class="field">
+            <label>Goal</label>
+            <select id="proteinGoal">
+                <option value="1.2">Maintenance</option>
+                <option value="1.6">Fat Loss</option>
+                <option value="2">Muscle Building</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateProtein()">
+        Calculate Protein
+    </button>
+
+    <div class="result-box" id="proteinResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     8 WATER
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">08 / HYDRATION</div>
+
+    <div class="calc-icon">💧</div>
+
+    <h3>Water Intake</h3>
+
+    <p>
+        Estimate your recommended daily water intake.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="waterWeight" type="number" placeholder="70">
+        </div>
+
+        <div class="field">
+            <label>Exercise (min/day)</label>
+            <input id="waterExercise" type="number" placeholder="60">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateWater()">
+        Calculate Water
+    </button>
+
+    <div class="result-box" id="waterResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     9 BODY FAT
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">09 / BODY COMPOSITION</div>
+
+    <div class="calc-icon">📏</div>
+
+    <h3>Body Fat %</h3>
+
+    <p>
+        Estimate body fat using the US Navy method.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Gender</label>
+            <select id="fatGender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Height (cm)</label>
+            <input id="fatHeight" type="number" placeholder="175">
+        </div>
+
+        <div class="field">
+            <label>Waist (cm)</label>
+            <input id="fatWaist" type="number" placeholder="80">
+        </div>
+
+        <div class="field">
+            <label>Neck (cm)</label>
+            <input id="fatNeck" type="number" placeholder="38">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateBodyFat()">
+        Calculate Body Fat
+    </button>
+
+    <div class="result-box" id="fatResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     10 IDEAL WEIGHT
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">10 / WEIGHT</div>
+
+    <div class="calc-icon">🎯</div>
+
+    <h3>Ideal Weight</h3>
+
+    <p>
+        Estimate a healthy reference weight range.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Height (cm)</label>
+            <input id="idealHeight" type="number" placeholder="175">
+        </div>
+
+        <div class="field">
+            <label>Gender</label>
+            <select id="idealGender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateIdealWeight()">
+        Calculate
+    </button>
+
+    <div class="result-box" id="idealResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     11 LBM
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">11 / BODY COMPOSITION</div>
+
+    <div class="calc-icon">💪</div>
+
+    <h3>Lean Body Mass</h3>
+
+    <p>
+        Calculate body mass excluding estimated fat.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="lbmWeight" type="number" placeholder="70">
+        </div>
+
+        <div class="field">
+            <label>Body Fat (%)</label>
+            <input id="lbmFat" type="number" placeholder="18">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateLBM()">
+        Calculate LBM
+    </button>
+
+    <div class="result-box" id="lbmResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     12 MACRO
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">12 / NUTRITION</div>
+
+    <div class="calc-icon">🥗</div>
+
+    <h3>Macro Calculator</h3>
+
+    <p>
+        Split your daily calories into protein, carbs and fat.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Daily Calories</label>
+            <input id="macroCalories" type="number" placeholder="2400">
+        </div>
+
+        <div class="field">
+            <label>Goal Ratio</label>
+            <select id="macroGoal">
+                <option value="balanced">Balanced</option>
+                <option value="lowcarb">Low Carb</option>
+                <option value="highprotein">High Protein</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateMacros()">
+        Calculate Macros
+    </button>
+
+    <div class="result-box" id="macroResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     13 CARBS
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">13 / NUTRITION</div>
+
+    <div class="calc-icon">🍚</div>
+
+    <h3>Carbohydrate Calculator</h3>
+
+    <p>
+        Estimate daily carbohydrate intake.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Daily Calories</label>
+            <input id="carbCalories" type="number" placeholder="2400">
+        </div>
+
+        <div class="field">
+            <label>Goal</label>
+            <select id="carbGoal">
+                <option value=".5">Balanced</option>
+                <option value=".35">Low Carb</option>
+                <option value=".55">High Energy</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateCarbs()">
+        Calculate Carbs
+    </button>
+
+    <div class="result-box" id="carbResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     14 FAT
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">14 / NUTRITION</div>
+
+    <div class="calc-icon">🥑</div>
+
+    <h3>Fat Intake Calculator</h3>
+
+    <p>
+        Estimate your daily dietary fat intake.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field full">
+            <label>Daily Calories</label>
+            <input id="fatCalories" type="number" placeholder="2400">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateFatIntake()">
+        Calculate Fat
+    </button>
+
+    <div class="result-box" id="fatIntakeResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     15 CALORIE BURN
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">15 / WORKOUT</div>
+
+    <div class="calc-icon">🏃</div>
+
+    <h3>Calorie Burn</h3>
+
+    <p>
+        Estimate calories burned during exercise.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Activity</label>
+            <select id="burnActivity">
+                <option value="9.8">Running</option>
+                <option value="7.5">Cycling</option>
+                <option value="6">Weightlifting</option>
+                <option value="8">Swimming</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Duration (min)</label>
+            <input id="burnDuration" type="number" placeholder="45">
+        </div>
+
+        <div class="field full">
+            <label>Weight (kg)</label>
+            <input id="burnWeight" type="number" placeholder="70">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateBurn()">
+        Calculate Burn
+    </button>
+
+    <div class="result-box" id="burnResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     16 HEART RATE
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">16 / CARDIO</div>
+
+    <div class="calc-icon">❤️</div>
+
+    <h3>Heart Rate Zones</h3>
+
+    <p>
+        Calculate estimated training heart-rate zones.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Age</label>
+            <input id="hrAge" type="number" placeholder="21">
+        </div>
+
+        <div class="field">
+            <label>Resting HR</label>
+            <input id="hrRest" type="number" placeholder="70">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateHR()">
+        Calculate Zones
+    </button>
+
+    <div class="result-box" id="hrResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     17 ONE REP MAX
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">17 / STRENGTH</div>
+
+    <div class="calc-icon">🏋️</div>
+
+    <h3>1RM Calculator</h3>
+
+    <p>
+        Estimate your one-repetition maximum using Epley.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="oneRmWeight" type="number" placeholder="80">
+        </div>
+
+        <div class="field">
+            <label>Repetitions</label>
+            <input id="oneRmReps" type="number" placeholder="8">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculate1RM()">
+        Calculate 1RM
+    </button>
+
+    <div class="result-box" id="oneRmResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     18 PACE
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">18 / RUNNING</div>
+
+    <div class="calc-icon">⏱️</div>
+
+    <h3>Pace Calculator</h3>
+
+    <p>
+        Calculate running pace and average speed.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Distance (km)</label>
+            <input id="paceDistance" type="number" step=".01" placeholder="5">
+        </div>
+
+        <div class="field">
+            <label>Time</label>
+            <input id="paceTime" type="text" placeholder="00:30:00">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculatePace()">
+        Calculate Pace
+    </button>
+
+    <div class="result-box" id="paceResult"></div>
+
+</div>
+
+
+<!-- =====================================================
+     19 STEPS
+===================================================== -->
+
+<div class="calc-card">
+
+    <div class="calc-number">19 / DAILY ACTIVITY</div>
+
+    <div class="calc-icon">👟</div>
+
+    <h3>Steps to Calories</h3>
+
+    <p>
+        Estimate calories burned from your daily steps.
+    </p>
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Steps</label>
+            <input id="stepsCount" type="number" placeholder="10000">
+        </div>
+
+        <div class="field">
+            <label>Weight (kg)</label>
+            <input id="stepsWeight" type="number" placeholder="70">
+        </div>
+
+    </div>
+
+    <button class="calculate-btn" onclick="calculateSteps()">
+        Calculate Calories
+    </button>
+
+    <div class="result-box" id="stepsResult"></div>
+
+</div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =======================================================
+     PAGE 2 - PROTEIN FOOD
+======================================================= -->
+
+<section id="foodPage" class="page">
+
+    <div class="food-header">
+
+        <div class="page-heading">
+            <div class="eyebrow">ALGOFIT NUTRITION</div>
+
+            <h1>
+                PROTEIN <span>FOOD</span>
+            </h1>
+
+            <p>
+                Discover high-protein foods for your fitness goals.
+            </p>
+        </div>
+
+    </div>
+
+
+    <div class="filter-container">
+
+        <button class="filter-btn active" data-filter="all">
+            All
+        </button>
+
+        <button class="filter-btn" data-filter="Vegetarian">
+            Vegetarian
+        </button>
+
+        <button class="filter-btn" data-filter="Non-vegetarian">
+            Non-vegetarian
+        </button>
+
+        <button class="filter-btn" data-filter="Dairy">
+            Dairy
+        </button>
+
+        <button class="filter-btn" data-filter="Pulses/legumes">
+            Pulses / Legumes
+        </button>
+
+        <button class="filter-btn" data-filter="Nuts & seeds">
+            Nuts & Seeds
+        </button>
+
+        <button class="filter-btn" data-filter="Protein supplements">
+            Supplements
+        </button>
+
+    </div>
+
+
+    <div class="food-grid" id="foodGrid"></div>
+
+</section>
+
+
+
+<!-- =========================================================
+     ABOUT ALGOFIT SECTION
+========================================================= -->
+
+<section class="about-algofit">
+
+    <div class="about-header">
+        <span class="about-tag">SMART FITNESS • REAL RESULTS</span>
+
+        <h2>Why Fitness Calculations Matter?</h2>
+
+        <p>
+            ALGOFIT helps you understand your body using simple,
+            practical fitness calculations so you can make better
+            decisions about your daily health and training.
+        </p>
+    </div>
+
+    <div class="about-grid">
+
+        <div class="about-card">
+            <div class="about-icon">⚖️</div>
+            <h3>Understand Your Body</h3>
+            <p>
+                BMI, body fat, BMR and lean body mass calculations
+                help you understand important aspects of your body
+                and fitness condition.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <div class="about-icon">🔥</div>
+            <h3>Manage Your Calories</h3>
+            <p>
+                Knowing your calorie requirements can help you plan
+                your food intake according to goals such as weight
+                loss, maintenance or muscle gain.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <div class="about-icon">🥩</div>
+            <h3>Track Your Protein</h3>
+            <p>
+                Protein plays an important role in muscle repair and
+                growth. ALGOFIT helps you estimate your daily protein
+                requirement and discover protein-rich foods.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <div class="about-icon">💧</div>
+            <h3>Stay Hydrated</h3>
+            <p>
+                Water is essential for normal body functions and
+                physical performance. Use the water calculator to
+                estimate your daily hydration needs.
+            </p>
+        </div>
+
+    </div>
+
+    <div class="real-life-box">
+
+        <div>
+            <span class="about-tag">REAL-LIFE USE</span>
+
+            <h3>From Numbers to Better Decisions</h3>
+
+            <p>
+                Fitness is not only about exercising harder. It is
+                also about understanding your energy needs, nutrition,
+                hydration and recovery. ALGOFIT brings these calculations
+                together in one simple platform so you can use the
+                information in your everyday fitness routine.
+            </p>
+        </div>
+
+        <div class="real-life-points">
+
+            <div>
+                <strong>01</strong>
+                <span>Set realistic fitness goals</span>
+            </div>
+
+            <div>
+                <strong>02</strong>
+                <span>Understand daily calorie needs</span>
+            </div>
+
+            <div>
+                <strong>03</strong>
+                <span>Plan protein and nutrition</span>
+            </div>
+
+            <div>
+                <strong>04</strong>
+                <span>Track your fitness progress</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- =======================================================
+     FOOTER
+======================================================= -->
+
+<footer>
+    <strong>ALGOFIT</strong> — Smart Fitness. Better Results.
+    <br><br>
+    Fitness calculations are estimates and should not replace professional medical advice.
+</footer>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+
+
+/* =========================================================
+   UTILITY FUNCTIONS
+========================================================= */
+
+function getValue(id) {
+    return parseFloat(document.getElementById(id).value);
+}
+
+function showResult(id, value, sub = "") {
+
+    const box = document.getElementById(id);
+
+    box.innerHTML = `
+        <div class="result-label">Your Result</div>
+        <div class="result-value">${value}</div>
+        ${sub ? `<div class="result-sub">${sub}</div>` : ""}
+    `;
+
+    box.classList.add("show");
+}
+
+
+/* =========================================================
+   1. BMI
+========================================================= */
+
+function calculateBMI() {
+
+    const height = getValue("bmiHeight");
+    const weight = getValue("bmiWeight");
+
+    if (!height || !weight) {
+        return alert("Please enter height and weight.");
+    }
+
+    const bmi = weight / Math.pow(height / 100, 2);
+
+    let category;
+
+    if (bmi < 18.5) {
+        category = "Underweight";
+    } else if (bmi < 25) {
+        category = "Normal";
+    } else if (bmi < 30) {
+        category = "Overweight";
+    } else {
+        category = "Obese";
+    }
+
+    showResult(
+        "bmiResult",
+        bmi.toFixed(1),
+        `Category: ${category}`
+    );
+}
+
+
+/* =========================================================
+   2. BMR
+========================================================= */
+
+function calculateBMR() {
+
+    const age = getValue("bmrAge");
+    const height = getValue("bmrHeight");
+    const weight = getValue("bmrWeight");
+    const gender = document.getElementById("bmrGender").value;
+
+    if (!age || !height || !weight) {
+        return alert("Please complete all fields.");
+    }
+
+    let bmr;
+
+    if (gender === "male") {
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+
+    showResult(
+        "bmrResult",
+        `${Math.round(bmr)} kcal/day`,
+        "Estimated basal metabolic rate."
+    );
+}
+
+
+/* =========================================================
+   3. TDEE
+========================================================= */
+
+function calculateTDEE() {
+
+    const bmr = getValue("tdeeBmr");
+    const activity = getValue("tdeeActivity");
+
+    if (!bmr) {
+        return alert("Enter your BMR.");
+    }
+
+    const tdee = bmr * activity;
+
+    showResult(
+        "tdeeResult",
+        `${Math.round(tdee)} kcal/day`,
+        "Estimated total daily energy expenditure."
+    );
+}
+
+
+/* =========================================================
+   4. DAILY CALORIES
+========================================================= */
+
+function calculateDailyCalories() {
+
+    const tdee = getValue("dailyTdee");
+    const adjustment = getValue("dailyGoal");
+
+    if (!tdee) {
+        return alert("Enter your TDEE.");
+    }
+
+    const calories = tdee + adjustment;
+
+    showResult(
+        "dailyResult",
+        `${Math.round(calories)} kcal/day`,
+        "Estimated daily calorie target."
+    );
+}
+
+
+/* =========================================================
+   5. DEFICIT
+========================================================= */
+
+function calculateDeficit() {
+
+    const rate = getValue("deficitRate");
+
+    if (!rate || rate <= 0) {
+        return alert("Enter a valid weight-loss rate.");
+    }
+
+    // Approximate energy equivalent.
+    const deficit = rate * 7700 / 7;
+
+    showResult(
+        "deficitResult",
+        `${Math.round(deficit)} kcal/day`,
+        `Approximate deficit for ${rate} kg/week.`
+    );
+}
+
+
+/* =========================================================
+   6. SURPLUS
+========================================================= */
+
+function calculateSurplus() {
+
+    const rate = getValue("surplusRate");
+
+    if (!rate || rate <= 0) {
+        return alert("Enter a valid gain rate.");
+    }
+
+    const surplus = rate * 7700 / 7;
+
+    showResult(
+        "surplusResult",
+        `+${Math.round(surplus)} kcal/day`,
+        `Approximate surplus for ${rate} kg/week.`
+    );
+}
+
+
+/* =========================================================
+   7. PROTEIN
+========================================================= */
+
+function calculateProtein() {
+
+    const weight = getValue("proteinWeight");
+    const multiplier = getValue("proteinGoal");
+
+    if (!weight) {
+        return alert("Enter your weight.");
+    }
+
+    const protein = weight * multiplier;
+
+    showResult(
+        "proteinResult",
+        `${Math.round(protein)} g/day`,
+        `Protein target based on ${multiplier} g/kg.`
+    );
+}
+
+
+/* =========================================================
+   8. WATER
+========================================================= */
+
+function calculateWater() {
+
+    const weight = getValue("waterWeight");
+    const exercise = getValue("waterExercise");
+
+    if (!weight) {
+        return alert("Enter your weight.");
+    }
+
+    const liters = weight * 0.035 + (exercise || 0) / 30 * 0.35;
+
+    showResult(
+        "waterResult",
+        `${liters.toFixed(2)} L/day`,
+        "Estimated daily fluid requirement."
+    );
+}
+
+
+/* =========================================================
+   9. BODY FAT - US NAVY
+========================================================= */
+
+function calculateBodyFat() {
+
+    const gender = document.getElementById("fatGender").value;
+    const height = getValue("fatHeight");
+    const waist = getValue("fatWaist");
+    const neck = getValue("fatNeck");
+
+    if (!height || !waist || !neck) {
+        return alert("Complete all measurements.");
+    }
+
+    let bodyFat;
+
+    if (gender === "male") {
+
+        bodyFat =
+            495 /
+            (
+                1.0324 -
+                0.19077 * Math.log10(waist - neck) +
+                0.15456 * Math.log10(height)
+            ) - 450;
+
+    } else {
+
+        const hipInput = prompt(
+            "For the female US Navy estimate, enter hip circumference in cm:"
+        );
+
+        const hip = parseFloat(hipInput);
+
+        if (!hip || waist + hip <= neck) {
+            return alert("Enter a valid hip measurement.");
+        }
+
+        bodyFat =
+            495 /
+            (
+                1.29579 -
+                0.35004 * Math.log10(waist + hip - neck) +
+                0.22100 * Math.log10(height)
+            ) - 450;
+    }
+
+    if (!isFinite(bodyFat)) {
+        return alert("Unable to calculate. Check measurements.");
+    }
+
+    showResult(
+        "fatResult",
+        `${bodyFat.toFixed(1)}%`,
+        "Estimated body fat percentage."
+    );
+}
+
+
+/* =========================================================
+   10. IDEAL WEIGHT
+========================================================= */
+
+function calculateIdealWeight() {
+
+    const height = getValue("idealHeight");
+    const gender = document.getElementById("idealGender").value;
+
+    if (!height) {
+        return alert("Enter your height.");
+    }
+
+    const inches = height / 2.54;
+
+    if (inches < 60) {
+        return alert("For this calculator, height should be at least 152.4 cm.");
+    }
+
+    const extraInches = inches - 60;
+
+    let ideal;
+
+    if (gender === "male") {
+        ideal = 50 + 2.3 * extraInches;
+    } else {
+        ideal = 45.5 + 2.3 * extraInches;
+    }
+
+    const lower = ideal * .9;
+    const upper = ideal * 1.1;
+
+    showResult(
+        "idealResult",
+        `${lower.toFixed(1)} – ${upper.toFixed(1)} kg`,
+        `Reference midpoint: ${ideal.toFixed(1)} kg.`
+    );
+}
+
+
+/* =========================================================
+   11. LBM
+========================================================= */
+
+function calculateLBM() {
+
+    const weight = getValue("lbmWeight");
+    const fat = getValue("lbmFat");
+
+    if (!weight || fat < 0 || fat > 70) {
+        return alert("Enter valid weight and body-fat percentage.");
+    }
+
+    const lbm = weight * (1 - fat / 100);
+
+    showResult(
+        "lbmResult",
+        `${lbm.toFixed(1)} kg`,
+        "Estimated lean body mass."
+    );
+}
+
+
+/* =========================================================
+   12. MACROS
+========================================================= */
+
+function calculateMacros() {
+
+    const calories = getValue("macroCalories");
+    const goal = document.getElementById("macroGoal").value;
+
+    if (!calories) {
+        return alert("Enter daily calories.");
+    }
+
+    let proteinPercent;
+    let carbPercent;
+    let fatPercent;
+
+    if (goal === "balanced") {
+        proteinPercent = .30;
+        carbPercent = .45;
+        fatPercent = .25;
+    }
+
+    if (goal === "lowcarb") {
+        proteinPercent = .35;
+        carbPercent = .25;
+        fatPercent = .40;
+    }
+
+    if (goal === "highprotein") {
+        proteinPercent = .40;
+        carbPercent = .35;
+        fatPercent = .25;
+    }
+
+    const protein = calories * proteinPercent / 4;
+    const carbs = calories * carbPercent / 4;
+    const fat = calories * fatPercent / 9;
+
+    showResult(
+        "macroResult",
+        `${Math.round(protein)}g P`,
+        `${Math.round(carbs)}g Carbs • ${Math.round(fat)}g Fat`
+    );
+}
+
+
+/* =========================================================
+   13. CARBS
+========================================================= */
+
+function calculateCarbs() {
+
+    const calories = getValue("carbCalories");
+    const percentage = getValue("carbGoal");
+
+    if (!calories) {
+        return alert("Enter daily calories.");
+    }
+
+    const carbs = calories * percentage / 4;
+
+    showResult(
+        "carbResult",
+        `${Math.round(carbs)} g/day`,
+        `Approximately ${Math.round(percentage * 100)}% of calories from carbohydrates.`
+    );
+}
+
+
+/* =========================================================
+   14. FAT
+========================================================= */
+
+function calculateFatIntake() {
+
+    const calories = getValue("fatCalories");
+
+    if (!calories) {
+        return alert("Enter daily calories.");
+    }
+
+    // 25-35% is a commonly used planning range.
+    const lower = calories * .25 / 9;
+    const upper = calories * .35 / 9;
+
+    showResult(
+        "fatIntakeResult",
+        `${Math.round(lower)} – ${Math.round(upper)} g/day`,
+        "Estimated dietary-fat range."
+    );
+}
+
+
+/* =========================================================
+   15. CALORIE BURN
+========================================================= */
+
+function calculateBurn() {
+
+    const met = getValue("burnActivity");
+    const duration = getValue("burnDuration");
+    const weight = getValue("burnWeight");
+
+    if (!duration || !weight) {
+        return alert("Complete all fields.");
+    }
+
+    // MET formula:
+    // kcal = MET × 3.5 × weight / 200 × minutes
+    const calories =
+        met * 3.5 * weight / 200 * duration;
+
+    showResult(
+        "burnResult",
+        `${Math.round(calories)} kcal`,
+        "Estimated exercise energy expenditure."
+    );
+}
+
+
+/* =========================================================
+   16. HEART RATE ZONES
+========================================================= */
+
+function calculateHR() {
+
+    const age = getValue("hrAge");
+    const resting = getValue("hrRest");
+
+    if (!age || !resting) {
+        return alert("Enter age and resting heart rate.");
+    }
+
+    const maxHR = 220 - age;
+    const reserve = maxHR - resting;
+
+    const zone = (low, high) => {
+        return `${Math.round(resting + reserve * low)}–${Math.round(resting + reserve * high)}`;
+    };
+
+    showResult(
+        "hrResult",
+        `Max HR: ${maxHR} bpm`,
+        `
+        Fat Burn: ${zone(.50,.60)} bpm<br>
+        Aerobic: ${zone(.60,.75)} bpm<br>
+        Anaerobic: ${zone(.75,.85)} bpm<br>
+        Peak: ${zone(.85,1.00)} bpm
+        `
+    );
+}
+
+
+/* =========================================================
+   17. 1RM
+========================================================= */
+
+function calculate1RM() {
+
+    const weight = getValue("oneRmWeight");
+    const reps = getValue("oneRmReps");
+
+    if (!weight || !reps || reps <= 0) {
+        return alert("Enter valid weight and repetitions.");
+    }
+
+    if (reps > 30) {
+        return alert("For the Epley estimate, use 30 or fewer repetitions.");
+    }
+
+    const oneRM = weight * (1 + reps / 30);
+
+    showResult(
+        "oneRmResult",
+        `${oneRM.toFixed(1)} kg`,
+        "Estimated one-repetition maximum."
+    );
+}
+
+
+/* =========================================================
+   18. PACE
+========================================================= */
+
+function calculatePace() {
+
+    const distance = getValue("paceDistance");
+    const timeString = document.getElementById("paceTime").value.trim();
+
+    if (!distance || !timeString) {
+        return alert("Enter distance and time.");
+    }
+
+    const parts = timeString.split(":").map(Number);
+
+    let seconds;
+
+    if (parts.length === 3) {
+        seconds =
+            parts[0] * 3600 +
+            parts[1] * 60 +
+            parts[2];
+    } else if (parts.length === 2) {
+        seconds =
+            parts[0] * 60 +
+            parts[1];
+    } else {
+        return alert("Use HH:MM:SS or MM:SS.");
+    }
+
+    if (!seconds || seconds <= 0) {
+        return alert("Enter a valid time.");
+    }
+
+    const paceSeconds = seconds / distance;
+
+    const paceMinutes = Math.floor(paceSeconds / 60);
+
+    const paceRemaining = Math.round(paceSeconds % 60)
+        .toString()
+        .padStart(2, "0");
+
+    const speed = distance / (seconds / 3600);
+
+    showResult(
+        "paceResult",
+        `${paceMinutes}:${paceRemaining} min/km`,
+        `Average speed: ${speed.toFixed(2)} km/h`
+    );
+}
+
+
+/* =========================================================
+   19. STEPS
+========================================================= */
+
+function calculateSteps() {
+
+    const steps = getValue("stepsCount");
+    const weight = getValue("stepsWeight");
+
+    if (!steps || !weight) {
+        return alert("Enter steps and weight.");
+    }
+
+    /*
+       Approximation:
+       Average step length ≈ 0.7m.
+       Walking energy ≈ 0.5 kcal/kg/km.
+    */
+
+    const distance = steps * .0007;
+
+    const calories = weight * distance * .5;
+
+    showResult(
+        "stepsResult",
+        `${Math.round(calories)} kcal`,
+        `Approximate distance: ${distance.toFixed(2)} km`
+    );
+}
+
+
+/* =========================================================
+   PROTEIN FOOD DATABASE
+========================================================= */
+
+const foods = [
+
+    {
+        name: "Soy Chunks",
+        category: "Vegetarian",
+        protein: 52,
+        calories: 345,
+        carbs: 33,
+        fat: 0.5,
+        emoji: "🫘"
+    },
+
+    {
+        name: "Tofu",
+        category: "Vegetarian",
+        protein: 17,
+        calories: 144,
+        carbs: 2.8,
+        fat: 8.7,
+        emoji: "⬜"
+    },
+
+    {
+        name: "Paneer",
+        category: "Dairy",
+        protein: 18,
+        calories: 265,
+        carbs: 3.4,
+        fat: 20,
+        emoji: "🧀"
+    },
+
+    {
+        name: "Greek Yogurt",
+        category: "Dairy",
+        protein: 10,
+        calories: 59,
+        carbs: 3.6,
+        fat: 0.4,
+        emoji: "🥛"
+    },
+
+    {
+        name: "Milk",
+        category: "Dairy",
+        protein: 3.3,
+        calories: 61,
+        carbs: 4.8,
+        fat: 3.3,
+        emoji: "🥛"
+    },
+
+    {
+        name: "Lentils",
+        category: "Pulses/legumes",
+        protein: 25,
+        calories: 352,
+        carbs: 63,
+        fat: 1.1,
+        emoji: "🫘"
+    },
+
+    {
+        name: "Chickpeas",
+        category: "Pulses/legumes",
+        protein: 19,
+        calories: 364,
+        carbs: 61,
+        fat: 6,
+        emoji: "🫘"
+    },
+
+    {
+        name: "Rajma",
+        category: "Pulses/legumes",
+        protein: 24,
+        calories: 333,
+        carbs: 60,
+        fat: 0.8,
+        emoji: "🫘"
+    },
+
+    {
+        name: "Green Peas",
+        category: "Pulses/legumes",
+        protein: 5.4,
+        calories: 81,
+        carbs: 14,
+        fat: 0.4,
+        emoji: "🟢"
+    },
+
+    {
+        name: "Peanuts",
+        category: "Nuts & seeds",
+        protein: 26,
+        calories: 567,
+        carbs: 16,
+        fat: 49,
+        emoji: "🥜"
+    },
+
+    {
+        name: "Almonds",
+        category: "Nuts & seeds",
+        protein: 21,
+        calories: 579,
+        carbs: 22,
+        fat: 50,
+        emoji: "🌰"
+    },
+
+    {
+        name: "Pumpkin Seeds",
+        category: "Nuts & seeds",
+        protein: 30,
+        calories: 559,
+        carbs: 11,
+        fat: 49,
+        emoji: "🌱"
+    },
+
+    {
+        name: "Chia Seeds",
+        category: "Nuts & seeds",
+        protein: 17,
+        calories: 486,
+        carbs: 42,
+        fat: 31,
+        emoji: "🌱"
+    },
+
+    {
+        name: "Eggs",
+        category: "Non-vegetarian",
+        protein: 12.6,
+        calories: 143,
+        carbs: 0.7,
+        fat: 9.5,
+        emoji: "🥚"
+    },
+
+    {
+        name: "Chicken Breast",
+        category: "Non-vegetarian",
+        protein: 31,
+        calories: 165,
+        carbs: 0,
+        fat: 3.6,
+        emoji: "🍗"
+    },
+
+    {
+        name: "Tuna",
+        category: "Non-vegetarian",
+        protein: 29,
+        calories: 132,
+        carbs: 0,
+        fat: 0.6,
+        emoji: "🐟"
+    },
+
+    {
+        name: "Salmon",
+        category: "Non-vegetarian",
+        protein: 25,
+        calories: 208,
+        carbs: 0,
+        fat: 13,
+        emoji: "🐟"
+    },
+
+    {
+        name: "Whey Protein",
+        category: "Protein supplements",
+        protein: 75,
+        calories: 400,
+        carbs: 8,
+        fat: 6,
+        emoji: "🥤"
+    },
+
+    {
+        name: "Pea Protein",
+        category: "Protein supplements",
+        protein: 80,
+        calories: 390,
+        carbs: 7,
+        fat: 5,
+        emoji: "🥤"
+    },
+
+    {
+        name: "Soy Protein",
+        category: "Protein supplements",
+        protein: 80,
+        calories: 370,
+        carbs: 8,
+        fat: 3,
+        emoji: "🥤"
+    }
+
+];
+
+
+/* =========================================================
+   FOOD RENDER
+========================================================= */
+
+const foodGrid = document.getElementById("foodGrid");
+
+function renderFoods(filter = "all") {
+
+    const filtered =
+        filter === "all"
+            ? foods
+            : foods.filter(food => food.category === filter);
+
+    foodGrid.innerHTML = filtered.map(food => `
+
+        <article class="food-card">
+
+            <div class="food-top">
+                ${food.emoji}
+            </div>
+
+            <div class="food-info">
+
+                <h3>${food.name}</h3>
+
+                <div class="food-category">
+                    ${food.category}
+                </div>
+
+                <div class="nutrition-grid">
+
+                    <div class="nutrition">
+                        <small>Protein</small>
+                        <strong>${food.protein} g</strong>
+                    </div>
+
+                    <div class="nutrition">
+                        <small>Calories</small>
+                        <strong>${food.calories} kcal</strong>
+                    </div>
+
+                    <div class="nutrition">
+                        <small>Carbs</small>
+                        <strong>${food.carbs} g</strong>
+                    </div>
+
+                    <div class="nutrition">
+                        <small>Fat</small>
+                        <strong>${food.fat} g</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    `).join("");
+}
+
+
+/* Initial food render */
+
+renderFoods();
+
+
+/* =========================================================
+   FOOD FILTERS
+========================================================= */
+
+document.querySelectorAll(".filter-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+            .querySelectorAll(".filter-btn")
+            .forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        renderFoods(button.dataset.filter);
+
+    });
+
+});
+
+
+/* =========================================================
+   PAGE SWITCHING
+========================================================= */
+
+const homePage = document.getElementById("homePage");
+const foodPage = document.getElementById("foodPage");
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document
+            .querySelectorAll(".nav-btn")
+            .forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        if (button.dataset.page === "home") {
+
+            homePage.classList.add("active");
+            foodPage.classList.remove("active");
+
+        } else {
+
+            homePage.classList.remove("active");
+            foodPage.classList.add("active");
+
+        }
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+        document
+            .getElementById("navLinks")
+            .classList.remove("open");
+
+    });
+
+});
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+document
+    .getElementById("mobileMenu")
+    .addEventListener("click", () => {
+
+        document
+            .getElementById("navLinks")
+            .classList.toggle("open");
+
+    });
+
+
+/* =========================================================
+   ENTER KEY SUPPORT
+========================================================= */
+
+document.addEventListener("keydown", event => {
+
+    if (event.key === "Escape") {
+
+        document
+            .getElementById("navLinks")
+            .classList.remove("open");
+
+    }
+
+});
+
+
+
+
+
+/* =========================================================
+   CALCULATOR SEARCH
+========================================================= */
+
+const calculatorSearch =
+    document.getElementById("calculatorSearch");
+
+const calculatorCards =
+    document.querySelectorAll(".calc-card");
+
+calculatorSearch.addEventListener("input", function () {
+
+    const searchText = this.value
+        .toLowerCase()
+        .trim();
+
+    calculatorCards.forEach(card => {
+
+        const title =
+            card.querySelector("h3")?.textContent.toLowerCase() || "";
+
+        const description =
+            card.querySelector("p")?.textContent.toLowerCase() || "";
+
+        const number =
+            card.querySelector(".calc-number")?.textContent.toLowerCase() || "";
+
+        const searchableText =
+            title + " " + description + " " + number;
+
+        if (searchableText.includes(searchText)) {
+
+            card.classList.remove("search-hidden");
+
+        } else {
+
+            card.classList.add("search-hidden");
+
+        }
+
+    });
+
+});
+
+
+
+
+
+/* =========================================================
+   TRAINING PROGRESS GRAPH
+========================================================= */
+
+const progressCanvas =
+    document.getElementById("progressChart");
+
+const ctx = progressCanvas.getContext("2d");
+
+
+function generateProgressGraph() {
+
+    /* -----------------------------------------
+       GET CALCULATOR VALUES
+    ----------------------------------------- */
+
+    const goal =
+        document.getElementById("goal")?.value || "Muscle Gain";
+
+    const weight =
+        parseFloat(document.getElementById("weight")?.value) || 70;
+
+    const height =
+        parseFloat(document.getElementById("height")?.value) || 175;
+
+    const age =
+        parseFloat(document.getElementById("age")?.value) || 25;
+
+    const experience =
+        document.getElementById("experience")?.value || "Beginner";
+
+    const bodyFat =
+        parseFloat(document.getElementById("bodyFat")?.value) || 18;
+
+
+    /* -----------------------------------------
+       EXPERIENCE FACTOR
+    ----------------------------------------- */
+
+    let experienceFactor = 1;
+
+    if (experience.toLowerCase().includes("beginner")) {
+        experienceFactor = 0.85;
+    }
+
+    else if (experience.toLowerCase().includes("intermediate")) {
+        experienceFactor = 1;
+    }
+
+    else if (experience.toLowerCase().includes("advanced")) {
+        experienceFactor = 1.12;
+    }
+
+
+    /* -----------------------------------------
+       GOAL FACTOR
+    ----------------------------------------- */
+
+    let goalFactor = 1;
+
+    if (goal.toLowerCase().includes("muscle")) {
+        goalFactor = 1.10;
+    }
+
+    else if (goal.toLowerCase().includes("weight loss")) {
+        goalFactor = 0.95;
+    }
+
+    else if (goal.toLowerCase().includes("fat")) {
+        goalFactor = 0.92;
+    }
+
+    else if (goal.toLowerCase().includes("strength")) {
+        goalFactor = 1.15;
+    }
+
+
+    /* -----------------------------------------
+       BASE INTENSITY
+    ----------------------------------------- */
+
+    let baseIntensity =
+        55 *
+        experienceFactor *
+        goalFactor;
+
+
+    /* Body fat adjustment */
+
+    if (bodyFat > 25) {
+        baseIntensity -= 5;
+    }
+
+    else if (bodyFat < 12) {
+        baseIntensity += 3;
+    }
+
+
+    /* Age adjustment */
+
+    if (age > 40) {
+        baseIntensity -= 4;
+    }
+
+    else if (age < 30) {
+        baseIntensity += 3;
+    }
+
+
+    /* Height/weight adjustment */
+
+    const bmi =
+        weight / Math.pow(height / 100, 2);
+
+    if (bmi > 30) {
+        baseIntensity -= 3;
+    }
+
+
+    baseIntensity =
+        Math.max(25, Math.min(75, baseIntensity));
+
+
+    /* -----------------------------------------
+       CREATE PROGRESSION
+    ----------------------------------------- */
+
+    const progression = [];
+
+    for (let i = 0; i < 7; i++) {
+
+        let value =
+            baseIntensity +
+            (i * 6);
+
+        /* Small variation */
+
+        if (i === 1) value -= 3;
+        if (i === 2) value -= 6;
+        if (i === 4) value -= 4;
+
+        value =
+            Math.max(10, Math.min(100, value));
+
+        progression.push(Math.round(value));
+    }
+
+
+    /* -----------------------------------------
+       UPDATE TEXT
+    ----------------------------------------- */
+
+    document.getElementById("currentIntensity")
+        .textContent =
+        progression[0] + "%";
+
+    document.getElementById("goalDisplay")
+        .textContent =
+        goal;
+
+
+    /* -----------------------------------------
+       DRAW GRAPH
+    ----------------------------------------- */
+
+    drawProgressChart(progression);
+}
+
+
+
+
+function drawProgressChart(values) {
+
+    const canvas = progressCanvas;
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    canvas.width =
+        rect.width * dpr;
+
+    canvas.height =
+        rect.height * dpr;
+
+    const context =
+        canvas.getContext("2d");
+
+    context.scale(dpr, dpr);
+
+
+    const width = rect.width;
+    const height = rect.height;
+
+
+    /* -----------------------------------------
+       GRAPH AREA
+    ----------------------------------------- */
+
+    const paddingLeft = 55;
+    const paddingRight = 20;
+    const paddingTop = 20;
+    const paddingBottom = 40;
+
+    const graphWidth =
+        width -
+        paddingLeft -
+        paddingRight;
+
+    const graphHeight =
+        height -
+        paddingTop -
+        paddingBottom;
+
+
+    /* -----------------------------------------
+       BACKGROUND
+    ----------------------------------------- */
+
+    context.fillStyle = "#0c1117";
+
+    context.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /* -----------------------------------------
+       HORIZONTAL GRID
+    ----------------------------------------- */
+
+    context.strokeStyle =
+        "rgba(100,120,140,.22)";
+
+    context.lineWidth = 1;
+
+    context.font =
+        "11px Arial";
+
+    context.fillStyle =
+        "#7f8a96";
+
+    for (let i = 0; i <= 5; i++) {
+
+        const y =
+            paddingTop +
+            graphHeight -
+            (i / 5) * graphHeight;
+
+        context.beginPath();
+
+        context.moveTo(
+            paddingLeft,
+            y
+        );
+
+        context.lineTo(
+            width - paddingRight,
+            y
+        );
+
+        context.stroke();
+
+
+        context.fillText(
+            i * 20,
+            18,
+            y + 4
+        );
+    }
+
+
+    /* -----------------------------------------
+       VERTICAL GRID
+    ----------------------------------------- */
+
+    for (let i = 0; i < values.length; i++) {
+
+        const x =
+            paddingLeft +
+            (i / (values.length - 1)) *
+            graphWidth;
+
+        context.beginPath();
+
+        context.moveTo(
+            x,
+            paddingTop
+        );
+
+        context.lineTo(
+            x,
+            height - paddingBottom
+        );
+
+        context.stroke();
+    }
+
+
+    /* -----------------------------------------
+       POINTS
+    ----------------------------------------- */
+
+    const points = values.map(
+        (value, index) => {
+
+            const x =
+                paddingLeft +
+                (index / (values.length - 1)) *
+                graphWidth;
+
+            const y =
+                paddingTop +
+                graphHeight -
+                (value / 100) *
+                graphHeight;
+
+            return { x, y };
+        }
+    );
+
+
+    /* -----------------------------------------
+       GRADIENT AREA
+    ----------------------------------------- */
+
+    const gradient =
+        context.createLinearGradient(
+            0,
+            paddingTop,
+            0,
+            height - paddingBottom
+        );
+
+    gradient.addColorStop(
+        0,
+        "rgba(0,198,255,.28)"
+    );
+
+    gradient.addColorStop(
+        1,
+        "rgba(16,185,129,.02)"
+    );
+
+
+    context.beginPath();
+
+    context.moveTo(
+        points[0].x,
+        height - paddingBottom
+    );
+
+    points.forEach(point => {
+
+        context.lineTo(
+            point.x,
+            point.y
+        );
+
+    });
+
+    context.lineTo(
+        points[points.length - 1].x,
+        height - paddingBottom
+    );
+
+    context.closePath();
+
+    context.fillStyle =
+        gradient;
+
+    context.fill();
+
+
+    /* -----------------------------------------
+       GRAPH LINE
+    ----------------------------------------- */
+
+    const lineGradient =
+        context.createLinearGradient(
+            0,
+            0,
+            width,
+            0
+        );
+
+    lineGradient.addColorStop(
+        0,
+        "#00c6ff"
+    );
+
+    lineGradient.addColorStop(
+        1,
+        "#10b981"
+    );
+
+
+    context.beginPath();
+
+    context.moveTo(
+        points[0].x,
+        points[0].y
+    );
+
+    for (let i = 1; i < points.length; i++) {
+
+        context.lineTo(
+            points[i].x,
+            points[i].y
+        );
+
+    }
+
+    context.strokeStyle =
+        lineGradient;
+
+    context.lineWidth = 3;
+
+    context.lineJoin = "round";
+
+    context.lineCap = "round";
+
+    context.stroke();
+
+
+    /* -----------------------------------------
+       POINTS + VALUES
+    ----------------------------------------- */
+
+    points.forEach((point, index) => {
+
+        /* Outer circle */
+
+        context.beginPath();
+
+        context.arc(
+            point.x,
+            point.y,
+            5,
+            0,
+            Math.PI * 2
+        );
+
+        context.fillStyle =
+            "#00c6ff";
+
+        context.fill();
+
+
+        /* Inner circle */
+
+        context.beginPath();
+
+        context.arc(
+            point.x,
+            point.y,
+            2,
+            0,
+            Math.PI * 2
+        );
+
+        context.fillStyle =
+            "#ffffff";
+
+        context.fill();
+
+
+        /* Value */
+
+        context.fillStyle =
+            "#dce6ee";
+
+        context.font =
+            "10px Arial";
+
+        context.textAlign =
+            "center";
+
+        context.fillText(
+            values[index] + "%",
+            point.x,
+            point.y - 12
+        );
+
+
+        /* Week */
+
+        context.fillStyle =
+            "#7f8a96";
+
+        context.fillText(
+            "Week " + (index + 1),
+            point.x,
+            height - 15
+        );
+
+    });
+}
+
+</script>
+
+</body>
+</html>
