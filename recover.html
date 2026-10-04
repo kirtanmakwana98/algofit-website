@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ALGOFIT - Exercise Log & Recovery</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0b0e14;
+            --card: rgba(18, 24, 38, 0.78);
+            --cyan: #00f2fe;
+            --blue: #4facfe;
+            --green: #00ff87;
+            --green2: #00e676;
+            --border: rgba(0, 242, 254, 0.18);
+            --text: #f3f7fb;
+            --muted: #8c9aac;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 10% 10%, rgba(0, 242, 254, 0.09), transparent 28%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 135, 0.07), transparent 30%),
+                #0b0e14;
+            overflow-x: hidden;
+        }
+
+        /* Hexagonal / tech grid */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.14;
+            background-image:
+                linear-gradient(rgba(0, 242, 254, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.08) 1px, transparent 1px);
+            background-size: 42px 42px;
+            mask-image: linear-gradient(to bottom, black, transparent 90%);
+            z-index: -2;
+        }
+
+        /* Ambient glow */
+        body::after {
+            content: "";
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            left: -180px;
+            top: 25%;
+            border-radius: 50%;
+            background: rgba(0, 242, 254, 0.07);
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glass {
+            background: linear-gradient(
+                145deg,
+                rgba(20, 29, 44, 0.88),
+                rgba(12, 18, 29, 0.74)
+            );
+            border: 1px solid var(--border);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px rgba(255,255,255,0.035);
+        }
+
+        .neon-border {
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            box-shadow:
+                0 0 25px rgba(0, 242, 254, 0.05),
+                inset 0 0 20px rgba(0, 242, 254, 0.025);
+        }
+
+        .gradient-text {
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #00f2fe,
+                #00ff87
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text {
+            background: linear-gradient(
+                90deg,
+                #00f2fe,
+                #00ff87
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Navigation */
+        .nav-link {
+            color: #8492a6;
+            transition: 0.25s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #00f2fe;
+        }
+
+        /* Inputs */
+        .input-box,
+        .custom-select {
+            width: 100%;
+            border-radius: 15px;
+            border: 1px solid rgba(107, 126, 151, 0.45);
+            background: rgba(18, 27, 41, 0.78);
+            color: white;
+            padding: 14px 16px;
+            outline: none;
+            transition: 0.25s ease;
+        }
+
+        .input-box:focus,
+        .custom-select:focus {
+            border-color: #00f2fe;
+            box-shadow:
+                0 0 0 3px rgba(0, 242, 254, 0.09),
+                0 0 25px rgba(0, 242, 254, 0.12);
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aab5c5;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        /* Custom searchable dropdown */
+        .exercise-dropdown {
+            position: relative;
+        }
+
+        .dropdown-trigger {
+            min-height: 54px;
+            width: 100%;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            background: rgba(18, 27, 41, 0.82);
+            padding: 0 16px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .dropdown-trigger:hover,
+        .exercise-dropdown.open .dropdown-trigger {
+            border-color: #00f2fe;
+            box-shadow: 0 0 22px rgba(0, 242, 254, 0.1);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: calc(100% + 8px);
+            z-index: 50;
+            display: none;
+            padding: 10px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            border-radius: 16px;
+            background: rgba(12, 19, 31, 0.97);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .exercise-dropdown.open .dropdown-menu {
+            display: block;
+            animation: dropdownIn 0.2s ease;
+        }
+
+        @keyframes dropdownIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 11px 13px;
+            border-radius: 11px;
+            background: #101825;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: white;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .search-input:focus {
+            border-color: #00f2fe;
+        }
+
+        .exercise-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .category-title {
+            color: #00f2fe;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            padding: 9px 10px 5px;
+            text-transform: uppercase;
+        }
+
+        .exercise-option {
+            padding: 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            color: #cbd5e1;
+            transition: 0.2s ease;
+        }
+
+        .exercise-option:hover {
+            background: rgba(0, 242, 254, 0.09);
+            color: white;
+        }
+
+        /* Button */
+        .main-button {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            min-height: 58px;
+            border: 0;
+            border-radius: 16px;
+            background: linear-gradient(
+                100deg,
+                #3b82f6,
+                #00c6ff,
+                #00ff87
+            );
+            color: #061018;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            box-shadow:
+                0 0 30px rgba(0, 242, 254, 0.18),
+                0 8px 25px rgba(0,0,0,0.25);
+            transition: 0.25s ease;
+        }
+
+        .main-button:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 40px rgba(0, 242, 254, 0.28),
+                0 12px 30px rgba(0,0,0,0.3);
+        }
+
+        .main-button:active {
+            transform: scale(0.98);
+        }
+
+        .main-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.4),
+                transparent
+            );
+            transform: skewX(-20deg);
+            transition: 0.6s;
+        }
+
+        .main-button:hover::before {
+            left: 140%;
+        }
+
+        /* Muscle visual */
+        .body-visual {
+            position: relative;
+            height: 310px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .body-shape {
+            position: relative;
+            width: 110px;
+            height: 235px;
+            opacity: 0.85;
+        }
+
+        .head {
+            position: absolute;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            left: 36px;
+            top: 0;
+            background: #27384a;
+            border: 1px solid rgba(0,242,254,0.3);
+        }
+
+        .neck {
+            position: absolute;
+            width: 25px;
+            height: 22px;
+            left: 43px;
+            top: 33px;
+            background: #27384a;
+        }
+
+        .torso {
+            position: absolute;
+            left: 23px;
+            top: 48px;
+            width: 64px;
+            height: 100px;
+            border-radius: 25px 25px 18px 18px;
+            background: #263749;
+            border: 1px solid rgba(0,242,254,0.25);
+        }
+
+        .arm {
+            position: absolute;
+            width: 22px;
+            height: 105px;
+            top: 53px;
+            border-radius: 14px;
+            background: #263749;
+            border: 1px solid rgba(0,242,254,0.2);
+        }
+
+        .arm.left {
+            left: 2px;
+            transform: rotate(8deg);
+        }
+
+        .arm.right {
+            right: 2px;
+            transform: rotate(-8deg);
+        }
+
+        .leg {
+            position: absolute;
+            top: 140px;
+            width: 27px;
+            height: 100px;
+            border-radius: 12px;
+            background: #263749;
+            border: 1px solid rgba(0,242,254,0.2);
+        }
+
+        .leg.left {
+            left: 27px;
+        }
+
+        .leg.right {
+            right: 27px;
+        }
+
+        .muscle.active {
+            background: linear-gradient(
+                180deg,
+                rgba(0,242,254,0.95),
+                rgba(0,255,135,0.8)
+            );
+            box-shadow:
+                0 0 18px rgba(0,242,254,0.7),
+                0 0 35px rgba(0,255,135,0.25);
+            animation: musclePulse 1.6s infinite alternate;
+        }
+
+        @keyframes musclePulse {
+            from {
+                filter: brightness(0.9);
+            }
+            to {
+                filter: brightness(1.35);
+            }
+        }
+
+        .muscle-label {
+            position: absolute;
+            padding: 5px 9px;
+            border-radius: 8px;
+            background: rgba(7, 13, 22, 0.9);
+            border: 1px solid rgba(0,242,254,0.2);
+            color: #9defff;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .label-top {
+            top: 55px;
+            left: calc(50% + 70px);
+        }
+
+        .label-bottom {
+            bottom: 40px;
+            right: calc(50% + 65px);
+        }
+
+        /* Result cards */
+        .stat-card {
+            position: relative;
+            padding: 20px;
+            border-radius: 17px;
+            background: rgba(17, 25, 39, 0.72);
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: 0.25s ease;
+            animation: slideUp 0.5s ease both;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0,242,254,0.25);
+            box-shadow: 0 10px 35px rgba(0,242,254,0.08);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,242,254,0.08);
+            border: 1px solid rgba(0,242,254,0.15);
+            font-size: 20px;
+        }
+
+        .stat-number {
+            margin-top: 12px;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .stat-title {
+            font-size: 12px;
+            color: #8795a9;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* Protein cards */
+        .protein-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(16, 24, 37, 0.75);
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: 0.3s ease;
+        }
+
+        .protein-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0,255,135,0.3);
+            box-shadow: 0 15px 35px rgba(0,255,135,0.08);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-green {
+            color: #00ff87;
+            background: rgba(0,255,135,0.09);
+            border: 1px solid rgba(0,255,135,0.18);
+        }
+
+        .badge-blue {
+            color: #00f2fe;
+            background: rgba(0,242,254,0.09);
+            border: 1px solid rgba(0,242,254,0.18);
+        }
+
+        /* Result area hidden initially */
+        #resultsSection {
+            display: none;
+        }
+
+        #resultsSection.show {
+            display: block;
+            animation: slideUp 0.6s ease;
+        }
+
+        .section-line {
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(0,242,254,0.3),
+                transparent
+            );
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0d13;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #24364a;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00a8c0;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .desktop-nav {
+                display: none;
+            }
+
+            .body-visual {
+                height: 260px;
+            }
+
+            .label-top,
+            .label-bottom {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="sticky top-0 z-40 border-b border-white/5 bg-[#0b0e14]/80 backdrop-blur-xl">
+
+    <div class="max-w-7xl mx-auto px-5 py-4 flex items-center justify-between">
+
+        <a href="#" class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center
+                        bg-gradient-to-br from-cyan-400/20 to-green-400/20
+                        border border-cyan-400/20 text-cyan-300 text-xl">
+                ♥
+            </div>
+
+            <div>
+                <div class="text-2xl font-extrabold logo-text tracking-tight">
+                    ALGOFIT
+                </div>
+
+                <div class="text-[9px] text-gray-500 tracking-[0.22em] uppercase">
+                    Smart Fitness
+                </div>
+            </div>
+        </a>
+
+        <nav class="desktop-nav flex items-center gap-8 text-sm font-semibold">
+            <a href="index.html" class="nav-link">Home / Calculators</a>
+            <a href="#" class="nav-link active">Exercise Guide</a>
+            
+        </nav>
+
+    </div>
+</header>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="max-w-7xl mx-auto px-5 py-10">
+
+    <!-- Hero -->
+
+    <section class="text-center mb-10">
+
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full
+                    border border-cyan-400/20 bg-cyan-400/5 text-cyan-300
+                    text-xs font-bold tracking-wider uppercase mb-5">
+
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+
+            Workout Intelligence
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-extrabold gradient-text">
+            POST-WORKOUT EXERCISE LOG
+        </h1>
+
+        <p class="text-gray-400 mt-4 max-w-2xl mx-auto text-sm md:text-base">
+            Log your workout, estimate workload and generate a personalized
+            post-workout recovery breakdown.
+        </p>
+
+    </section>
+
+
+    <!-- ================= INPUT SECTION ================= -->
+
+    <section class="glass neon-border rounded-3xl p-5 md:p-8">
+
+        <div class="flex items-center justify-between mb-7">
+
+            <div>
+                <h2 class="text-xl md:text-2xl font-bold">
+                    Exercise Log
+                </h2>
+
+                <p class="text-gray-500 text-sm mt-1">
+                    Enter the details of your completed workout.
+                </p>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                LIVE CALCULATOR
+            </div>
+
+        </div>
+
+
+        <div class="grid lg:grid-cols-2 gap-7">
+
+
+            <!-- LEFT INPUTS -->
+
+            <div>
+
+                <!-- Exercise selector -->
+
+                <label class="input-label">
+                    Select Exercise
+                </label>
+
+                <div class="exercise-dropdown" id="exerciseDropdown">
+
+                    <button type="button"
+                            class="dropdown-trigger"
+                            id="exerciseTrigger">
+
+                        <span id="selectedExercise">
+                            Barbell Squat
+                        </span>
+
+                        <span class="text-gray-400 text-lg">
+                           ⌄
+                        </span>
+
+                    </button>
+
+
+                    <div class="dropdown-menu">
+
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="exerciseSearch"
+                            placeholder="Search exercise..."
+                        >
+
+                        <div class="exercise-list" id="exerciseList">
+
+                            <div class="category-title">
+                                Weight Training
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Barbell Squat"
+                                 data-type="weight"
+                                 data-muscles="Quads, Glutes">
+                                Barbell Squat
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Bench Press"
+                                 data-type="weight"
+                                 data-muscles="Chest, Triceps">
+                                Bench Press
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Deadlift"
+                                 data-type="weight"
+                                 data-muscles="Back, Glutes">
+                                Deadlift
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Barbell Row"
+                                 data-type="weight"
+                                 data-muscles="Back, Biceps">
+                                Barbell Row
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Shoulder Press"
+                                 data-type="weight"
+                                 data-muscles="Shoulders, Triceps">
+                                Shoulder Press
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Bicep Curl"
+                                 data-type="weight"
+                                 data-muscles="Biceps">
+                                Bicep Curl
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Leg Press"
+                                 data-type="weight"
+                                 data-muscles="Quads, Glutes">
+                                Leg Press
+                            </div>
+
+                            <div class="category-title">
+                                Bodyweight
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Pull-ups"
+                                 data-type="weight"
+                                 data-muscles="Back, Biceps">
+                                Pull-ups
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Push-ups"
+                                 data-type="weight"
+                                 data-muscles="Chest, Triceps">
+                                Push-ups
+                            </div>
+
+                            <div class="category-title">
+                                Cardio
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Running"
+                                 data-type="cardio"
+                                 data-muscles="Legs, Calves">
+                                Running
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Cycling"
+                                 data-type="cardio"
+                                 data-muscles="Quads, Calves">
+                                Cycling
+                            </div>
+
+                            <div class="exercise-option"
+                                 data-exercise="Walking"
+                                 data-type="cardio"
+                                 data-muscles="Legs">
+                                Walking
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- Dynamic input area -->
+
+                <div class="grid sm:grid-cols-2 gap-4 mt-6">
+
+                    <!-- Weight -->
+
+                    <div id="weightField">
+
+                        <label class="input-label">
+                            Lifted Weight
+                        </label>
+
+                        <div class="relative">
+
+                            <input
+                                id="liftedWeight"
+                                type="number"
+                                min="0"
+                                value="80"
+                                class="input-box pr-14"
+                            >
+
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2
+                                         text-gray-500 text-sm">
+                                kg
+                            </span>
+
+                        </div>
+                    </div>
+
+
+                    <!-- Reps -->
+
+                    <div id="repsField">
+
+                        <label class="input-label">
+                            Reps
+                        </label>
+
+                        <input
+                            id="reps"
+                            type="number"
+                            min="1"
+                            value="10"
+                            class="input-box"
+                        >
+
+                    </div>
+
+
+                    <!-- Sets -->
+
+                    <div id="setsField">
+
+                        <label class="input-label">
+                            Sets
+                        </label>
+
+                        <input
+                            id="sets"
+                            type="number"
+                            min="1"
+                            value="3"
+                            class="input-box"
+                        >
+
+                    </div>
+
+
+                    <!-- RPE -->
+
+                    <div id="rpeField">
+
+                        <label class="input-label">
+                            RPE
+                        </label>
+
+                        <input
+                            id="rpe"
+                            type="number"
+                            min="1"
+                            max="10"
+                            value="8"
+                            class="input-box"
+                        >
+
+                    </div>
+
+
+                    <!-- Cardio duration -->
+
+                    <div id="durationField" class="hidden">
+
+                        <label class="input-label">
+                            Duration
+                        </label>
+
+                        <div class="relative">
+
+                            <input
+                                id="duration"
+                                type="number"
+                                min="1"
+                                value="30"
+                                class="input-box pr-16"
+                            >
+
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2
+                                         text-gray-500 text-sm">
+                                min
+                            </span>
+
+                        </div>
+                    </div>
+
+
+                    <!-- Heart rate -->
+
+                    <div id="heartRateField" class="hidden">
+
+                        <label class="input-label">
+                            Avg Heart Rate
+                        </label>
+
+                        <div class="relative">
+
+                            <input
+                                id="heartRate"
+                                type="number"
+                                min="40"
+                                value="140"
+                                class="input-box pr-16"
+                            >
+
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2
+                                         text-gray-500 text-sm">
+                                bpm
+                            </span>
+
+                        </div>
+                    </div>
+
+
+                    <!-- Distance -->
+
+                    <div id="distanceField" class="hidden">
+
+                        <label class="input-label">
+                            Distance
+                        </label>
+
+                        <div class="relative">
+
+                            <input
+                                id="distance"
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                value="5"
+                                class="input-box pr-16"
+                            >
+
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2
+                                         text-gray-500 text-sm">
+                                km
+                            </span>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- RPE slider -->
+
+                <div id="rpeSliderContainer" class="mt-5">
+
+                    <div class="flex justify-between mb-2">
+
+                        <span class="text-xs text-gray-500">
+                            Effort Intensity
+                        </span>
+
+                        <span id="rpeValue"
+                              class="text-xs font-bold text-cyan-300">
+                            RPE 8 / 10
+                        </span>
+
+                    </div>
+
+                    <input
+                        id="rpeSlider"
+                        type="range"
+                        min="1"
+                        max="10"
+                        value="8"
+                        class="w-full accent-cyan-400"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT MUSCLE VISUAL -->
+
+            <div class="glass rounded-2xl p-5">
+
+                <div class="flex justify-between items-center mb-2">
+
+                    <div>
+                        <h3 class="font-bold">
+                            Muscle Activation
+                        </h3>
+
+                        <p class="text-xs text-gray-500 mt-1">
+                            Based on selected exercise
+                        </p>
+                    </div>
+
+                    <span id="muscleStatus"
+                          class="badge badge-blue">
+                        QUADS + GLUTES
+                    </span>
+
+                </div>
+
+
+                <div class="body-visual">
+
+                    <div class="body-shape">
+
+                        <div class="head muscle"></div>
+
+                        <div class="neck muscle"></div>
+
+                        <div class="torso muscle" id="torso"></div>
+
+                        <div class="arm left muscle" id="leftArm"></div>
+
+                        <div class="arm right muscle" id="rightArm"></div>
+
+                        <div class="leg left muscle active" id="leftLeg"></div>
+
+                        <div class="leg right muscle active" id="rightLeg"></div>
+
+                    </div>
+
+                    <div class="muscle-label label-top" id="muscleLabelTop">
+                        Quadriceps
+                    </div>
+
+                    <div class="muscle-label label-bottom" id="muscleLabelBottom">
+                        Glutes
+                    </div>
+
+                </div>
+
+
+                <div class="grid grid-cols-2 gap-3">
+
+                    <div class="rounded-xl p-3 bg-white/[0.025] border border-white/5">
+                        <div class="text-[10px] text-gray-500 uppercase">
+                            Exercise
+                        </div>
+
+                        <div id="visualExercise"
+                             class="text-sm font-semibold mt-1">
+                            Barbell Squat
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl p-3 bg-white/[0.025] border border-white/5">
+                        <div class="text-[10px] text-gray-500 uppercase">
+                            Focus
+                        </div>
+
+                        <div id="visualMuscles"
+                             class="text-sm font-semibold mt-1 text-cyan-300">
+                            Quads + Glutes
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Calculate -->
+
+        <div class="mt-8">
+
+            <button
+                id="calculateButton"
+                class="main-button">
+
+                <span class="relative z-10">
+                    LOG EXERCISE & CALCULATE RECOVERY
+                </span>
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= RESULTS ================= -->
+
+    <section id="resultsSection" class="mt-10">
+
+
+        <div class="flex items-center gap-4 mb-6">
+
+            <div class="section-line flex-1"></div>
+
+            <div class="text-xs font-bold tracking-[0.18em] text-cyan-300">
+                RECOVERY ANALYTICS
+            </div>
+
+            <div class="section-line flex-1"></div>
+
+        </div>
+
+
+        <div class="grid lg:grid-cols-[0.9fr_1.1fr] gap-6">
+
+
+            <!-- LEFT SUMMARY -->
+
+            <div class="space-y-4">
+
+                <!-- Protein target -->
+
+                <div class="stat-card">
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="stat-icon">
+                            🥩
+                        </div>
+
+                        <div>
+
+                            <div class="stat-title">
+                                Total Daily Protein Target
+                            </div>
+
+                            <div class="stat-number">
+                                <span id="dailyProtein">180</span>g
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 text-xs text-gray-500">
+                        Estimated fitness target based on body weight.
+                    </div>
+
+                </div>
+
+
+                <!-- Immediate protein -->
+
+                <div class="stat-card">
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="stat-icon">
+                            🥤
+                        </div>
+
+                        <div>
+
+                            <div class="stat-title">
+                                Post-Workout Target Window
+                            </div>
+
+                            <div class="stat-number">
+                                <span id="postProtein">35</span>g
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 text-xs text-gray-500">
+                        Suggested target within approximately 1–2 hours.
+                    </div>
+
+                </div>
+
+
+                <!-- Volume -->
+
+                <div class="stat-card">
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="stat-icon">
+                            🏋️
+                        </div>
+
+                        <div>
+
+                            <div class="stat-title">
+                                Estimated Workout Volume
+                            </div>
+
+                            <div class="stat-number">
+                                <span id="workoutVolume">2400</span>
+                                <span class="text-sm text-gray-500">kg</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4 text-xs text-gray-500">
+                        Weight × repetitions × sets.
+                    </div>
+
+                </div>
+
+
+                <!-- Intensity -->
+
+                <div class="stat-card">
+
+                    <div class="flex items-center gap-4">
+
+                        <div class="stat-icon">
+                            ⚡
+                        </div>
+
+                        <div>
+
+                            <div class="stat-title">
+                                Training Intensity
+                            </div>
+
+                            <div class="stat-number">
+                                RPE <span id="resultRPE">8</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT CHART -->
+
+            <div class="glass neon-border rounded-2xl p-5 md:p-7">
+
+                <div class="mb-5">
+
+                    <h2 class="font-bold text-lg">
+                        POST-WORKOUT RECOVERY BREAKDOWN
+                    </h2>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Next 1–2 hours • Estimated recovery nutrition distribution
+                    </p>
+
+                </div>
+
+
+                <div class="relative max-w-[360px] mx-auto">
+
+                    <canvas id="recoveryChart"></canvas>
+
+                    <div class="absolute inset-0 flex flex-col items-center justify-center
+                                pointer-events-none">
+
+                        <div id="chartCenter"
+                             class="text-3xl font-extrabold gradient-text">
+                            100%
+                        </div>
+
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider">
+                            Recovery Focus
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Legend -->
+
+                <div class="mt-6 space-y-3">
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center gap-3">
+
+                            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+
+                            <span class="text-sm text-gray-300">
+                                Fast-Digesting Protein
+                            </span>
+
+                        </div>
+
+                        <span class="text-sm font-bold text-cyan-300">
+                            45%
+                        </span>
+
+                    </div>
+
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center gap-3">
+
+                            <span class="w-3 h-3 rounded-full bg-teal-400"></span>
+
+                            <span class="text-sm text-gray-300">
+                                Slow-Digesting Protein
+                            </span>
+
+                        </div>
+
+                        <span class="text-sm font-bold text-teal-300">
+                            25%
+                        </span>
+
+                    </div>
+
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center gap-3">
+
+                            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+
+                            <span class="text-sm text-gray-300">
+                                Carbohydrates
+                            </span>
+
+                        </div>
+
+                        <span class="text-sm font-bold text-green-300">
+                            20%
+                        </span>
+
+                    </div>
+
+
+                    <div class="flex items-center justify-between">
+
+                        <div class="flex items-center gap-3">
+
+                            <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+
+                            <span class="text-sm text-gray-300">
+                                EAAs & Hydration
+                            </span>
+
+                        </div>
+
+                        <span class="text-sm font-bold text-blue-300">
+                            10%
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= PROTEIN SOURCES ================= -->
+
+        <div class="mt-10">
+
+            <div class="mb-5">
+
+                <h2 class="text-xl font-bold">
+                    Suggested Protein Sources
+                </h2>
+
+                <p class="text-gray-500 text-sm mt-1">
+                    Options that can help you reach your post-workout target.
+                </p>
+
+            </div>
+
+
+            <div class="grid md:grid-cols-3 gap-5">
+
+
+                <!-- Whey -->
+
+                <div class="protein-card">
+
+                    <div class="flex justify-between items-start">
+
+                        <div class="text-3xl">
+                            🥤
+                        </div>
+
+                        <span class="badge badge-blue">
+                            FAST
+                        </span>
+
+                    </div>
+
+                    <h3 class="font-bold text-lg mt-5">
+                        Whey Isolate
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Fast digestion
+                    </p>
+
+                    <div class="mt-5 flex items-end justify-between">
+
+                        <div>
+                            <div class="text-2xl font-extrabold text-cyan-300">
+                                30g
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                Protein
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="font-bold">
+                                250
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                kcal
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Greek yogurt -->
+
+                <div class="protein-card">
+
+                    <div class="flex justify-between items-start">
+
+                        <div class="text-3xl">
+                            🥛
+                        </div>
+
+                        <span class="badge badge-green">
+                            MEDIUM
+                        </span>
+
+                    </div>
+
+                    <h3 class="font-bold text-lg mt-5">
+                        Greek Yogurt / Cottage Cheese
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Medium digestion
+                    </p>
+
+                    <div class="mt-5 flex items-end justify-between">
+
+                        <div>
+                            <div class="text-2xl font-extrabold text-green-300">
+                                25g
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                Protein
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="font-bold">
+                                220
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                kcal
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Tofu -->
+
+                <div class="protein-card">
+
+                    <div class="flex justify-between items-start">
+
+                        <div class="text-3xl">
+                            🌱
+                        </div>
+
+                        <span class="badge badge-green">
+                            SLOW
+                        </span>
+
+                    </div>
+
+                    <h3 class="font-bold text-lg mt-5">
+                        Chicken / Tofu / Soy Chunks
+                    </h3>
+
+                    <p class="text-xs text-gray-500 mt-1">
+                        Whole-food protein
+                    </p>
+
+                    <div class="mt-5 flex items-end justify-between">
+
+                        <div>
+                            <div class="text-2xl font-extrabold text-green-300">
+                                30g
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                Protein
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <div class="font-bold">
+                                250
+                            </div>
+
+                            <div class="text-[10px] text-gray-500 uppercase">
+                                kcal
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Disclaimer -->
+
+        <div class="mt-8 rounded-xl border border-yellow-400/10
+                    bg-yellow-400/[0.025] p-4">
+
+            <p class="text-xs text-gray-500 leading-relaxed">
+                <strong class="text-gray-400">ALGOFIT estimate:</strong>
+                These calculations are simplified fitness estimates for educational
+                and tracking purposes. Individual nutrition and recovery requirements
+                can vary based on training, body composition, diet and other factors.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+
+    /* =========================================================
+       EXERCISE DATABASE
+    ========================================================= */
+
+    const exerciseData = {
+
+        "Barbell Squat": {
+            type: "weight",
+            muscles: ["Quads", "Glutes"],
+            labelTop: "Quadriceps",
+            labelBottom: "Glutes"
+        },
+
+        "Bench Press": {
+            type: "weight",
+            muscles: ["Chest", "Triceps"],
+            labelTop: "Chest",
+            labelBottom: "Triceps"
+        },
+
+        "Deadlift": {
+            type: "weight",
+            muscles: ["Back", "Glutes"],
+            labelTop: "Back",
+            labelBottom: "Glutes"
+        },
+
+        "Barbell Row": {
+            type: "weight",
+            muscles: ["Back", "Biceps"],
+            labelTop: "Back",
+            labelBottom: "Biceps"
+        },
+
+        "Shoulder Press": {
+            type: "weight",
+            muscles: ["Shoulders", "Triceps"],
+            labelTop: "Shoulders",
+            labelBottom: "Triceps"
+        },
+
+        "Bicep Curl": {
+            type: "weight",
+            muscles: ["Biceps"],
+            labelTop: "Biceps",
+            labelBottom: "Arms"
+        },
+
+        "Leg Press": {
+            type: "weight",
+            muscles: ["Quads", "Glutes"],
+            labelTop: "Quadriceps",
+            labelBottom: "Glutes"
+        },
+
+        "Pull-ups": {
+            type: "weight",
+            muscles: ["Back", "Biceps"],
+            labelTop: "Back",
+            labelBottom: "Biceps"
+        },
+
+        "Push-ups": {
+            type: "weight",
+            muscles: ["Chest", "Triceps"],
+            labelTop: "Chest",
+            labelBottom: "Triceps"
+        },
+
+        "Running": {
+            type: "cardio",
+            muscles: ["Legs", "Calves"],
+            labelTop: "Legs",
+            labelBottom: "Calves"
+        },
+
+        "Cycling": {
+            type: "cardio",
+            muscles: ["Quads", "Calves"],
+            labelTop: "Quadriceps",
+            labelBottom: "Calves"
+        },
+
+        "Walking": {
+            type: "cardio",
+            muscles: ["Legs"],
+            labelTop: "Legs",
+            labelBottom: "Lower Body"
+        }
+
+    };
+
+
+    /* =========================================================
+       DOM ELEMENTS
+    ========================================================= */
+
+    const dropdown =
+        document.getElementById("exerciseDropdown");
+
+    const trigger =
+        document.getElementById("exerciseTrigger");
+
+    const selectedExercise =
+        document.getElementById("selectedExercise");
+
+    const searchInput =
+        document.getElementById("exerciseSearch");
+
+    const options =
+        document.querySelectorAll(".exercise-option");
+
+
+    let currentExercise = "Barbell Squat";
+    let recoveryChart = null;
+
+
+    /* =========================================================
+       DROPDOWN
+    ========================================================= */
+
+    trigger.addEventListener("click", () => {
+
+        dropdown.classList.toggle("open");
+
+        if (dropdown.classList.contains("open")) {
+            searchInput.focus();
+        }
+
+    });
+
+
+    document.addEventListener("click", (event) => {
+
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove("open");
+        }
+
+    });
+
+
+    /* Search */
+
+    searchInput.addEventListener("input", () => {
+
+        const query =
+            searchInput.value.toLowerCase().trim();
+
+        options.forEach(option => {
+
+            const name =
+                option.dataset.exercise.toLowerCase();
+
+            option.style.display =
+                name.includes(query) ? "block" : "none";
+
+        });
+
+    });
+
+
+    /* Select exercise */
+
+    options.forEach(option => {
+
+        option.addEventListener("click", () => {
+
+            currentExercise =
+                option.dataset.exercise;
+
+            selectedExercise.textContent =
+                currentExercise;
+
+            dropdown.classList.remove("open");
+
+            searchInput.value = "";
+
+            options.forEach(item => {
+                item.style.display = "block";
+            });
+
+            updateExerciseUI();
+
+        });
+
+    });
+
+
+    /* =========================================================
+       DYNAMIC EXERCISE UI
+    ========================================================= */
+
+    function updateExerciseUI() {
+
+        const data =
+            exerciseData[currentExercise];
+
+        const weightFields = [
+            document.getElementById("weightField"),
+            document.getElementById("repsField"),
+            document.getElementById("setsField"),
+            document.getElementById("rpeField"),
+            document.getElementById("rpeSliderContainer")
+        ];
+
+        const cardioFields = [
+            document.getElementById("durationField"),
+            document.getElementById("heartRateField"),
+            document.getElementById("distanceField")
+        ];
+
+
+        if (data.type === "weight") {
+
+            weightFields.forEach(field => {
+                field.classList.remove("hidden");
+            });
+
+            cardioFields.forEach(field => {
+                field.classList.add("hidden");
+            });
+
+        } else {
+
+            weightFields.forEach(field => {
+                field.classList.add("hidden");
+            });
+
+            cardioFields.forEach(field => {
+                field.classList.remove("hidden");
+            });
+
+        }
+
+
+        /* Muscle labels */
+
+        document.getElementById("muscleStatus")
+            .textContent =
+            data.muscles.join(" + ").toUpperCase();
+
+        document.getElementById("visualExercise")
+            .textContent =
+            currentExercise;
+
+        document.getElementById("visualMuscles")
+            .textContent =
+            data.muscles.join(" + ");
+
+        document.getElementById("muscleLabelTop")
+            .textContent =
+            data.labelTop;
+
+        document.getElementById("muscleLabelBottom")
+            .textContent =
+            data.labelBottom;
+
+
+        updateMuscleDiagram(data.muscles);
+
+    }
+
+
+    /* =========================================================
+       MUSCLE DIAGRAM
+    ========================================================= */
+
+    function updateMuscleDiagram(muscles) {
+
+        const bodyParts = document.querySelectorAll(".muscle");
+
+        bodyParts.forEach(part => {
+            part.classList.remove("active");
+        });
+
+
+        const muscleString =
+            muscles.join(" ").toLowerCase();
+
+
+        /* Legs */
+
+        if (
+            muscleString.includes("quad") ||
+            muscleString.includes("leg") ||
+            muscleString.includes("calf") ||
+            muscleString.includes("glute")
+        ) {
+
+            document
+                .getElementById("leftLeg")
+                .classList.add("active");
+
+            document
+                .getElementById("rightLeg")
+                .classList.add("active");
+
+        }
+
+
+        /* Chest */
+
+        if (
+            muscleString.includes("chest")
+        ) {
+
+            document
+                .getElementById("torso")
+                .classList.add("active");
+
+        }
+
+
+        /* Back */
+
+        if (
+            muscleString.includes("back")
+        ) {
+
+            document
+                .getElementById("torso")
+                .classList.add("active");
+
+        }
+
+
+        /* Arms */
+
+        if (
+            muscleString.includes("biceps") ||
+            muscleString.includes("triceps") ||
+            muscleString.includes("shoulder")
+        ) {
+
+            document
+                .getElementById("leftArm")
+                .classList.add("active");
+
+            document
+                .getElementById("rightArm")
+                .classList.add("active");
+
+        }
+
+    }
+
+
+    /* =========================================================
+       RPE SLIDER
+    ========================================================= */
+
+    const rpeSlider =
+        document.getElementById("rpeSlider");
+
+    const rpeInput =
+        document.getElementById("rpe");
+
+    const rpeValue =
+        document.getElementById("rpeValue");
+
+
+    rpeSlider.addEventListener("input", () => {
+
+        const value =
+            rpeSlider.value;
+
+        rpeInput.value = value;
+
+        rpeValue.textContent =
+            `RPE ${value} / 10`;
+
+    });
+
+
+    rpeInput.addEventListener("input", () => {
+
+        let value =
+            Number(rpeInput.value);
+
+        if (value < 1) value = 1;
+        if (value > 10) value = 10;
+
+        rpeSlider.value = value;
+
+        rpeValue.textContent =
+            `RPE ${value} / 10`;
+
+    });
+
+
+    /* =========================================================
+       WORKOUT CALCULATION
+    ========================================================= */
+
+    function calculateWorkout() {
+
+        const data =
+            exerciseData[currentExercise];
+
+
+        let volume = 0;
+        let rpe = 7;
+
+
+        if (data.type === "weight") {
+
+            const weight =
+                Number(document.getElementById("liftedWeight").value) || 0;
+
+            const reps =
+                Number(document.getElementById("reps").value) || 0;
+
+            const sets =
+                Number(document.getElementById("sets").value) || 0;
+
+            rpe =
+                Number(document.getElementById("rpe").value) || 7;
+
+
+            /*
+                Workout Volume
+                = Weight × Reps × Sets
+            */
+
+            volume =
+                weight * reps * sets;
+
+        } else {
+
+            const duration =
+                Number(document.getElementById("duration").value) || 0;
+
+            const distance =
+                Number(document.getElementById("distance").value) || 0;
+
+            const heartRate =
+                Number(document.getElementById("heartRate").value) || 0;
+
+
+            /*
+                Cardio workload estimate.
+
+                This is NOT a medical measurement.
+                It is only used to generate a visual
+                workload score for the application.
+            */
+
+            volume =
+                Math.round(
+                    (duration * 20) +
+                    (distance * 100) +
+                    (heartRate * 2)
+                );
+
+            rpe = Math.min(
+                10,
+                Math.max(
+                    1,
+                    Math.round(
+                        4 + (heartRate - 100) / 15
+                    )
+                )
+            );
+
+        }
+
+
+        /*
+            Post-workout protein:
+
+            Base = 25g
+
+            Additional:
+            0.005 × workout volume
+
+            Minimum = 25g
+            Maximum = 45g
+        */
+
+        let postProtein =
+            25 + (0.005 * volume);
+
+        postProtein =
+            Math.max(
+                25,
+                Math.min(
+                    45,
+                    postProtein
+                )
+            );
+
+
+        /*
+            Daily protein target.
+
+            Example bodyweight = 82kg
+
+            82 × 2.2 ≈ 180g
+        */
+
+        const currentWeight =
+            Number(
+                document.getElementById("currentWeight")?.value
+            ) || 82;
+
+
+        const dailyProtein =
+            Math.round(currentWeight * 2.2);
+
+
+        return {
+            volume: Math.round(volume),
+            postProtein: Math.round(postProtein),
+            dailyProtein: dailyProtein,
+            rpe: rpe
+        };
+
+    }
+
+
+    /* =========================================================
+       RECOVERY CHART
+    ========================================================= */
+
+    function createRecoveryChart() {
+
+        const canvas =
+            document.getElementById("recoveryChart");
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        if (recoveryChart) {
+            recoveryChart.destroy();
+        }
+
+
+        /*
+            Gradient 1
+        */
+
+        const cyanGradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                300,
+                300
+            );
+
+        cyanGradient.addColorStop(
+            0,
+            "#00F2FE"
+        );
+
+        cyanGradient.addColorStop(
+            1,
+            "#4FACFE"
+        );
+
+
+        /*
+            Gradient 2
+        */
+
+        const tealGradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                300,
+                300
+            );
+
+        tealGradient.addColorStop(
+            0,
+            "#00E5D4"
+        );
+
+        tealGradient.addColorStop(
+            1,
+            "#00BFA5"
+        );
+
+
+        /*
+            Gradient 3
+        */
+
+        const greenGradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                300,
+                300
+            );
+
+        greenGradient.addColorStop(
+            0,
+            "#00FF87"
+        );
+
+        greenGradient.addColorStop(
+            1,
+            "#00E676"
+        );
+
+
+        /*
+            Gradient 4
+        */
+
+        const blueGradient =
+            ctx.createLinearGradient(
+                0,
+                0,
+                300,
+                300
+            );
+
+        blueGradient.addColorStop(
+            0,
+            "#60A5FA"
+        );
+
+        blueGradient.addColorStop(
+            1,
+            "#3B82F6"
+        );
+
+
+        recoveryChart =
+            new Chart(
+                ctx,
+                {
+                    type: "doughnut",
+
+                    data: {
+
+                        labels: [
+                            "Fast-Digesting Protein",
+                            "Slow-Digesting Protein",
+                            "Carbohydrates",
+                            "EAAs & Hydration"
+                        ],
+
+                        datasets: [
+                            {
+                                data: [
+                                    45,
+                                    25,
+                                    20,
+                                    10
+                                ],
+
+                                backgroundColor: [
+                                    cyanGradient,
+                                    tealGradient,
+                                    greenGradient,
+                                    blueGradient
+                                ],
+
+                                borderColor: "#111827",
+
+                                borderWidth: 5,
+
+                                hoverOffset: 10
+                            }
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive: true,
+
+                        cutout: "70%",
+
+                        animation: {
+                            animateRotate: true,
+                            duration: 1200
+                        },
+
+                        plugins: {
+
+                            legend: {
+                                display: false
+                            },
+
+                            tooltip: {
+                                backgroundColor:
+                                    "rgba(8,13,22,0.95)",
+
+                                borderColor:
+                                    "rgba(0,242,254,0.2)",
+
+                                borderWidth: 1,
+
+                                padding: 12,
+
+                                callbacks: {
+
+                                    label: function(context) {
+
+                                        return (
+                                            " " +
+                                            context.label +
+                                            ": " +
+                                            context.parsed +
+                                            "%"
+                                        );
+
+                                    }
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    /* =========================================================
+       LOG EXERCISE
+    ========================================================= */
+
+    document
+        .getElementById("calculateButton")
+        .addEventListener("click", () => {
+
+
+            const result =
+                calculateWorkout();
+
+
+            /*
+                Update statistics
+            */
+
+            document.getElementById("dailyProtein")
+                .textContent =
+                result.dailyProtein;
+
+            document.getElementById("postProtein")
+                .textContent =
+                result.postProtein;
+
+            document.getElementById("workoutVolume")
+                .textContent =
+                result.volume.toLocaleString();
+
+            document.getElementById("resultRPE")
+                .textContent =
+                result.rpe;
+
+
+            /*
+                Show result section
+            */
+
+            const results =
+                document.getElementById("resultsSection");
+
+            results.classList.add("show");
+
+
+            /*
+                Recreate chart
+            */
+
+            createRecoveryChart();
+
+
+            /*
+                Scroll smoothly to results
+            */
+
+            setTimeout(() => {
+
+                results.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }, 100);
+
+        });
+
+
+    /* =========================================================
+       CURRENT WEIGHT FIELD
+       Added dynamically so user can change it.
+    ========================================================= */
+
+    const currentWeightInput =
+        document.createElement("input");
+
+    currentWeightInput.type = "hidden";
+    currentWeightInput.id = "currentWeight";
+    currentWeightInput.value = "82";
+
+    document.body.appendChild(
+        currentWeightInput
+    );
+
+
+    /* =========================================================
+       INITIAL STATE
+    ========================================================= */
+
+    updateExerciseUI();
+
+</script>
+
+</body>
+</html>
