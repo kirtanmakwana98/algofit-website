@@ -1369,1735 +1369,592 @@
          JAVASCRIPT
     ========================== -->
 
-  <script>
-
-/* =========================================================
+   
+<script>
+/* ============================================================
    ALGOFIT WEIGHT GAIN PLANNER
-   DYNAMIC SUPPLEMENT LOGIC
-========================================================= */
-
-
-/* =========================================================
-   1. SUPPLEMENT DATABASE
-========================================================= */
+   PRIMARY LOGIC:
+   TOTAL KG TO GAIN determines the recommendation set.
+   TIMELINE is a secondary modifier and changes the plan
+   intensity/usage text.
+============================================================ */
 
 const supplements = [
-
     {
-        id: 1,
-        name: "Mass Gainer",
-        category: "Direct Weight Gainer",
-        filter: "direct",
-        icon: "🥤",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "High-calorie combination of carbohydrates and protein.",
-        usage: "Useful when normal food intake is not enough to meet calorie needs.",
-        macros: [55, 25, 20]
+        id: 1, name: "Mass Gainer", category: "Calorie Supplement",
+        filter: "direct", icon: "🥤", effect: "Direct Weight Gain",
+        badge: "✅ Direct", description: "High-calorie powder designed to make it easier to increase total calorie intake.",
+        usage: "Useful when normal meals are not enough to reach a calorie surplus.", macros: [55, 35, 10]
     },
-
     {
-        id: 2,
-        name: "Whey Protein Concentrate",
-        category: "Protein",
-        filter: "indirect",
-        icon: "🥛",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Convenient complete protein source.",
-        usage: "Use to help meet your daily protein target.",
-        macros: [8, 75, 17]
+        id: 2, name: "Meal Replacement Powder", category: "Calorie Supplement",
+        filter: "direct", icon: "🍽️", effect: "Direct Weight Gain",
+        badge: "✅ Direct", description: "Convenient calorie and protein option when a full meal is difficult to consume.",
+        usage: "Use as a convenient meal option, not as a replacement for a varied diet.", macros: [45, 35, 20]
     },
-
     {
-        id: 3,
-        name: "Whey Protein Isolate",
-        category: "Protein",
-        filter: "indirect",
-        icon: "⚡",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "High-protein whey option with relatively little carbohydrate and fat.",
-        usage: "Convenient protein source around meals or training.",
-        macros: [5, 85, 10]
+        id: 3, name: "Maltodextrin", category: "Carbohydrate",
+        filter: "direct", icon: "⚡", effect: "Direct Calorie Increase",
+        badge: "✅ Direct", description: "Rapidly consumed carbohydrate powder that can increase calorie intake.",
+        usage: "Can be added to a shake when additional carbohydrates are needed.", macros: [90, 5, 5]
     },
-
     {
-        id: 4,
-        name: "Whey Protein Hydrolysate",
-        category: "Protein",
-        filter: "indirect",
-        icon: "🔬",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Partially hydrolyzed whey protein.",
-        usage: "Convenient protein option.",
-        macros: [5, 85, 10]
+        id: 4, name: "Dextrose", category: "Carbohydrate",
+        filter: "direct", icon: "⚡", effect: "Direct Calorie Increase",
+        badge: "✅ Direct", description: "Fast carbohydrate powder used in sports nutrition.",
+        usage: "Use according to the product label and overall nutrition plan.", macros: [95, 2, 3]
     },
-
     {
-        id: 5,
-        name: "Casein Protein",
-        category: "Protein",
-        filter: "indirect",
-        icon: "🌙",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Slow-digesting dairy protein.",
-        usage: "Can be used between meals or before sleep.",
-        macros: [5, 80, 15]
+        id: 5, name: "Oat Powder", category: "Whole-Food Calories",
+        filter: "direct", icon: "🥣", effect: "Direct Calorie Increase",
+        badge: "✅ Direct", description: "Oat-based option providing carbohydrates and calories.",
+        usage: "Add to smoothies or meals to increase calorie intake.", macros: [60, 20, 20]
     },
-
     {
-        id: 6,
-        name: "Milk Protein Blend",
-        category: "Protein",
-        filter: "indirect",
-        icon: "🥛",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Combination of whey and casein protein.",
-        usage: "Provides a mixture of faster and slower proteins.",
-        macros: [7, 78, 15]
+        id: 6, name: "High-Calorie Oat Shake", category: "Calorie Supplement",
+        filter: "direct", icon: "🥣", effect: "Direct Weight Gain",
+        badge: "✅ Direct", description: "Oat-based calorie shake option.",
+        usage: "Can be combined with milk or another protein source.", macros: [60, 20, 20]
     },
-
     {
-        id: 7,
-        name: "Maltodextrin",
-        category: "Carbohydrate",
-        filter: "direct",
-        icon: "⚡",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "Carbohydrate powder used to increase carbohydrate intake.",
-        usage: "Can be added to shakes when extra carbohydrates are needed.",
-        macros: [95, 0, 5]
+        id: 7, name: "Whey Protein Concentrate", category: "Protein",
+        filter: "indirect", icon: "🥛", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Convenient protein source that can help meet daily protein needs.",
+        usage: "Use when normal food intake does not provide enough protein.", macros: [5, 85, 10]
     },
-
     {
-        id: 8,
-        name: "Dextrose",
-        category: "Carbohydrate",
-        filter: "direct",
-        icon: "🔋",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "Rapidly available carbohydrate powder.",
-        usage: "Adds carbohydrates and calories to drinks.",
-        macros: [96, 0, 4]
+        id: 8, name: "Whey Protein Isolate", category: "Protein",
+        filter: "indirect", icon: "🥛", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "High-protein powder with relatively low carbohydrate and fat content.",
+        usage: "Useful when you need a convenient protein source.", macros: [3, 92, 5]
     },
-
     {
-        id: 9,
-        name: "Oat Powder",
-        category: "Carbohydrate",
-        filter: "direct",
-        icon: "🌾",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "Ground oats providing carbohydrates, calories and some protein.",
-        usage: "Easy addition to shakes, smoothies or meals.",
-        macros: [65, 15, 20]
+        id: 9, name: "Casein Protein", category: "Protein",
+        filter: "indirect", icon: "🌙", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Slow-digesting protein option.",
+        usage: "Can be used between meals or at a convenient time.", macros: [5, 85, 10]
     },
-
     {
-        id: 10,
-        name: "Meal Replacement Powder",
-        category: "Meal Replacement",
-        filter: "direct",
-        icon: "🍽️",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "Powder containing calories and multiple macronutrients.",
-        usage: "Convenient option when preparing a normal meal is difficult.",
-        macros: [45, 30, 25]
+        id: 10, name: "Milk Protein Blend", category: "Protein",
+        filter: "indirect", icon: "🥛", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Combination of milk-derived protein sources.",
+        usage: "Convenient protein option alongside normal meals.", macros: [5, 85, 10]
     },
-
     {
-        id: 11,
-        name: "Soy Protein",
-        category: "Plant Protein",
-        filter: "indirect",
-        icon: "🌱",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Plant-based protein derived from soy.",
-        usage: "Useful for increasing protein intake without dairy.",
-        macros: [10, 75, 15]
+        id: 11, name: "Soy Protein", category: "Plant Protein",
+        filter: "indirect", icon: "🌱", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Plant-based protein option.",
+        usage: "Useful for people choosing a plant-based protein source.", macros: [8, 80, 12]
     },
-
     {
-        id: 12,
-        name: "Pea Protein",
-        category: "Plant Protein",
-        filter: "indirect",
-        icon: "🫛",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Plant-based protein made from peas.",
-        usage: "Vegetarian or vegan protein option.",
-        macros: [10, 75, 15]
+        id: 12, name: "Pea Protein", category: "Plant Protein",
+        filter: "indirect", icon: "🌱", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Plant-based protein powder.",
+        usage: "Can be used to help increase daily protein intake.", macros: [8, 80, 12]
     },
-
     {
-        id: 13,
-        name: "Rice Protein",
-        category: "Plant Protein",
-        filter: "indirect",
-        icon: "🍚",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Plant-based protein derived from rice.",
-        usage: "Can be combined with other plant proteins.",
-        macros: [10, 75, 15]
+        id: 13, name: "Rice Protein", category: "Plant Protein",
+        filter: "indirect", icon: "🌾", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Rice-derived plant protein.",
+        usage: "Convenient plant protein option.", macros: [8, 80, 12]
     },
-
     {
-        id: 14,
-        name: "Hemp Protein",
-        category: "Plant Protein",
-        filter: "indirect",
-        icon: "🌿",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Plant protein containing protein and fats.",
-        usage: "Can be added to smoothies or meals.",
-        macros: [20, 50, 30]
+        id: 14, name: "Plant Protein Blend", category: "Plant Protein",
+        filter: "indirect", icon: "🌿", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Blend of plant protein sources.",
+        usage: "Useful when choosing a plant-based protein blend.", macros: [8, 80, 12]
     },
-
     {
-        id: 15,
-        name: "Plant Protein Blend",
-        category: "Plant Protein",
-        filter: "indirect",
-        icon: "🌱",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Blend of plant proteins such as pea and rice.",
-        usage: "Convenient plant-based protein source.",
-        macros: [10, 75, 15]
+        id: 15, name: "Creatine Monohydrate", category: "Performance",
+        filter: "performance", icon: "💪", effect: "Performance Support",
+        badge: "🔵 Performance", description: "Widely studied sports supplement for high-intensity exercise performance.",
+        usage: "Use according to the product label and training plan.", macros: [0, 0, 0]
     },
-
     {
-        id: 16,
-        name: "Creatine Monohydrate",
-        category: "Performance",
-        filter: "performance",
-        icon: "💪",
-        effect: "Performance Support",
-        badge: "❌ Support Only",
-        description: "Performance supplement used with resistance training.",
-        usage: "Used consistently according to the product directions.",
-        macros: [0, 0, 0]
+        id: 16, name: "EAA Powder", category: "Performance",
+        filter: "performance", icon: "🧬", effect: "Amino Acid Support",
+        badge: "🔵 Performance", description: "Essential amino acid supplement.",
+        usage: "Optional supplement; prioritize adequate total dietary protein.", macros: [0, 100, 0]
     },
-
     {
-        id: 17,
-        name: "EAA Powder",
-        category: "Performance",
-        filter: "performance",
-        icon: "🧬",
-        effect: "Performance Support",
-        badge: "❌ Support Only",
-        description: "Provides essential amino acids.",
-        usage: "Optional amino-acid supplementation.",
-        macros: [0, 100, 0]
+        id: 17, name: "BCAA Powder", category: "Performance",
+        filter: "performance", icon: "🧬", effect: "Amino Acid Support",
+        badge: "🔵 Performance", description: "Branched-chain amino acid supplement.",
+        usage: "Optional; adequate dietary protein generally remains the priority.", macros: [0, 100, 0]
     },
-
     {
-        id: 18,
-        name: "BCAA Powder",
-        category: "Performance",
-        filter: "performance",
-        icon: "⚙️",
-        effect: "Performance Support",
-        badge: "❌ Support Only",
-        description: "Provides branched-chain amino acids.",
-        usage: "Used in some sports nutrition routines.",
-        macros: [0, 100, 0]
+        id: 18, name: "Pre-Workout Powder", category: "Performance",
+        filter: "performance", icon: "🚀", effect: "Training Support",
+        badge: "🔵 Performance", description: "Multi-ingredient product designed to support training energy and focus.",
+        usage: "Use according to the product label.", macros: [0, 0, 0]
     },
-
     {
-        id: 19,
-        name: "Glutamine Powder",
-        category: "Performance",
-        filter: "performance",
-        icon: "🧪",
-        effect: "Performance Support",
-        badge: "❌ Support Only",
-        description: "Amino-acid supplement found in sports nutrition products.",
-        usage: "Optional supplement used by some athletes.",
-        macros: [0, 100, 0]
+        id: 19, name: "Electrolyte Powder", category: "Hydration",
+        filter: "performance", icon: "💧", effect: "Hydration Support",
+        badge: "🔵 Support", description: "Powder used to provide electrolytes.",
+        usage: "Useful when electrolyte replacement is appropriate.", macros: [0, 0, 0]
     },
-
     {
-        id: 20,
-        name: "Pre-Workout Powder",
-        category: "Performance",
-        filter: "performance",
-        icon: "🚀",
-        effect: "Performance Support",
-        badge: "❌ Support Only",
-        description: "Multi-ingredient product designed to support training energy and focus.",
-        usage: "Use according to the product label.",
-        macros: [0, 0, 0]
+        id: 20, name: "Recovery Drink Mix", category: "Recovery",
+        filter: "indirect", icon: "💧", effect: "Recovery Support",
+        badge: "🟡 Indirect", description: "Combination of carbohydrates and/or protein for convenient recovery nutrition.",
+        usage: "Can be used after training when convenient.", macros: [50, 35, 15]
     },
-
     {
-        id: 21,
-        name: "Recovery Drink Mix",
-        category: "Recovery",
-        filter: "indirect",
-        icon: "💧",
-        effect: "Indirect Weight Gain",
-        badge: "🟡 Indirectly",
-        description: "Combination of carbohydrates and/or protein for convenient recovery nutrition.",
-        usage: "Can be used after training when convenient.",
-        macros: [50, 35, 15]
+        id: 21, name: "Hemp Protein", category: "Plant Protein",
+        filter: "indirect", icon: "🌿", effect: "Protein Support",
+        badge: "🟡 Indirect", description: "Plant-based protein option containing additional nutrients.",
+        usage: "Can help increase protein intake as part of a varied diet.", macros: [15, 55, 30]
     },
-
     {
-        id: 22,
-        name: "High-Calorie Oat Shake",
-        category: "Calorie Supplement",
-        filter: "direct",
-        icon: "🥣",
-        effect: "Direct Weight Gain",
-        badge: "✅ Yes (Direct)",
-        description: "Oat-based calorie shake option.",
-        usage: "Can be combined with milk or another protein source.",
-        macros: [60, 20, 20]
+        id: 22, name: "Glutamine Powder", category: "Performance",
+        filter: "performance", icon: "🧪", effect: "Supplement Support",
+        badge: "🔵 Support", description: "Amino-acid supplement found in sports nutrition products.",
+        usage: "Optional supplement; it is not a primary weight-gain powder.", macros: [0, 100, 0]
     }
-
 ];
 
-
-/* =========================================================
-   2. APPLICATION STATE
-========================================================= */
-
+/* ---------- state ---------- */
 let selectedDays = 30;
-
 let activeFilter = "all";
-
 let searchTerm = "";
-
 let macroCharts = {};
 
+/* ---------- DOM ---------- */
+const currentWeightInput = document.getElementById("currentWeight");
+const targetWeightInput = document.getElementById("targetWeight");
+const timeTarget = document.getElementById("timeTarget");
+const gainRate = document.getElementById("gainRate");
+const calorieSurplus = document.getElementById("calorieSurplus");
+const recommendationGrid = document.getElementById("recommendationGrid");
+const recommendationSubtitle = document.getElementById("recommendationSubtitle");
+const directoryList = document.getElementById("directoryList");
+const searchInput = document.getElementById("searchInput");
 
-/* =========================================================
-   3. DOM ELEMENTS
-========================================================= */
-
-const currentWeightInput =
-    document.getElementById("currentWeight");
-
-const targetWeightInput =
-    document.getElementById("targetWeight");
-
-const timeTarget =
-    document.getElementById("timeTarget");
-
-const gainRate =
-    document.getElementById("gainRate");
-
-const calorieSurplus =
-    document.getElementById("calorieSurplus");
-
-const recommendationGrid =
-    document.getElementById("recommendationGrid");
-
-const recommendationSubtitle =
-    document.getElementById("recommendationSubtitle");
-
-const directoryList =
-    document.getElementById("directoryList");
-
-const searchInput =
-    document.getElementById("searchInput");
-
-
-/* =========================================================
-   4. BASIC CALCULATIONS
-========================================================= */
-
-function calculateWeightDifference(current, target) {
-
-    return target - current;
-
+function num(value) {
+    const n = parseFloat(value);
+    return Number.isFinite(n) ? n : 0;
 }
-
-
-function calculateDailyGain(current, target, days) {
-
-    const difference =
-        calculateWeightDifference(
-            current,
-            target
-        );
-
-    return difference / days;
-
-}
-
-
-function calculateSurplus(dailyGain) {
-
-    if (dailyGain <= 0) {
-        return 0;
-    }
-
-    /*
-        Simplified estimate:
-        approximately 7,700 kcal per kg.
-
-        This is only a planning estimate.
-    */
-
-    return dailyGain * 7700;
-
-}
-
 
 function formatNumber(value, decimals = 2) {
-
-    return Number(value).toFixed(decimals);
-
+    return num(value).toFixed(decimals);
 }
 
+function findSupplement(name) {
+    return supplements.find(item => item.name === name);
+}
 
-/* =========================================================
-   5. NEW DYNAMIC PLAN TYPE LOGIC
-========================================================= */
+/* ============================================================
+   CORE LOGIC
+   TOTAL KG DIFFERENCE IS THE PRIMARY DECISION.
+   TIMELINE IS SECONDARY.
+============================================================ */
 
-/*
-    IMPORTANT:
-
-    The recommendation is now based on:
-
-    A. TOTAL WEIGHT DIFFERENCE
-    B. DAILY GAIN RATE
-    C. TIMELINE
-
-    Therefore changing either target weight OR timeline
-    can change the recommendation.
-*/
-
-
-function determinePlanType(
-    weightDifference,
-    dailyRate,
-    days
-) {
-
-    /* -----------------------------------------
-       Target is not above current weight
-    ----------------------------------------- */
-
+function determinePlan(weightDifference, days) {
     if (weightDifference <= 0) {
-
         return {
             type: "maintenance",
             title: "No Weight Gain Required",
-            color: "blue"
+            description: "Your target is not higher than your current weight."
         };
-
     }
 
+    const dailyGain = weightDifference / days;
 
-    /* -----------------------------------------
-       Very small total gain
-       Example:
-       82 → 82.5 kg
-       82 → 83 kg
-    ----------------------------------------- */
+    /*
+       PRIMARY RULE = TOTAL KG TO GAIN
 
-    if (
-        weightDifference < 1 &&
-        dailyRate < 0.05
-    ) {
+       0–2 kg       → Light
+       >2–5 kg      → Lean
+       >5–10 kg     → Moderate
+       >10–15 kg    → High
+       >15–20 kg    → Very High
+       >20–30 kg    → Aggressive
+       >30 kg       → Extreme
 
+       This means 10 kg and 30 kg CANNOT return
+       the same recommendation set.
+    */
+
+    if (weightDifference <= 2) {
         return {
             type: "light",
             title: "Light Gain Plan",
-            color: "blue"
+            description: "Small total weight increase — focus mainly on protein and food-based calories."
         };
-
     }
 
-
-    /* -----------------------------------------
-       Lean gain
-       Example:
-       82 → 84 kg in 60 days
-    ----------------------------------------- */
-
-    if (
-        dailyRate < 0.05 &&
-        weightDifference < 3
-    ) {
-
+    if (weightDifference <= 5) {
         return {
             type: "lean",
             title: "Lean Gain Plan",
-            color: "green"
+            description: "Moderate target — prioritize protein with controlled additional calories."
         };
-
     }
 
-
-    /* -----------------------------------------
-       Moderate gain
-    ----------------------------------------- */
-
-    if (
-        dailyRate >= 0.05 &&
-        dailyRate < 0.10
-    ) {
-
+    if (weightDifference <= 10) {
         return {
             type: "moderate",
             title: "Moderate Gain Plan",
-            color: "cyan"
+            description: "Larger target — additional calorie-dense foods may become useful."
         };
-
     }
 
-
-    /* -----------------------------------------
-       High gain
-    ----------------------------------------- */
-
-    if (
-        dailyRate >= 0.10 &&
-        dailyRate <= 0.15
-    ) {
-
+    if (weightDifference <= 15) {
         return {
             type: "high",
             title: "High Gain Plan",
-            color: "yellow"
+            description: "Large target — calorie-dense options can make the required intake easier."
         };
-
     }
 
+    if (weightDifference <= 20) {
+        return {
+            type: "veryHigh",
+            title: "Very High Gain Plan",
+            description: "Very large target — prioritize a structured nutrition plan rather than relying only on powders."
+        };
+    }
 
-    /* -----------------------------------------
-       Aggressive gain
-    ----------------------------------------- */
-
-    if (
-        dailyRate > 0.15
-    ) {
-
+    if (weightDifference <= 30) {
         return {
             type: "aggressive",
             title: "Aggressive Gain Plan",
-            color: "red"
+            description: "Very large target — the calculator highlights calorie-dense options, but such a target may require professional guidance."
         };
-
     }
-
 
     return {
-        type: "moderate",
-        title: "Moderate Gain Plan",
-        color: "cyan"
+        type: "extreme",
+        title: "Extreme Gain Target",
+        description: "This is a very large requested increase. Supplements should not be treated as a shortcut; consider professional nutrition guidance."
+    };
+}
+
+/* ============================================================
+   DIFFERENT RECOMMENDATIONS FOR DIFFERENT KG RANGES
+============================================================ */
+
+function getRecommendations(planType, dailyGain) {
+    const useSpeed = dailyGain >= 0.10
+        ? "Because the selected timeline requires a faster gain rate, use only as needed to help meet your overall calorie target."
+        : "Use only when normal food intake is not enough to meet your nutrition target.";
+
+    const sets = {
+
+        light: [
+            ["Whey Protein Isolate", "Convenient protein option if food alone does not provide enough protein."],
+            ["Casein Protein", "Optional slower-digesting protein source."],
+            ["Plant Protein Blend", "Alternative plant-based protein option."]
+        ],
+
+        lean: [
+            ["Whey Protein Isolate", "Helps make daily protein intake easier."],
+            ["Oat Powder", "Adds calories and carbohydrates through meals or shakes."],
+            ["Casein Protein", "Optional convenient protein source."]
+        ],
+
+        moderate: [
+            ["Whey Protein Concentrate", "Convenient protein source alongside normal meals."],
+            ["Oat Powder", "Adds carbohydrates and calories."],
+            ["Creatine Monohydrate", "Performance supplement that can complement resistance training."]
+        ],
+
+        high: [
+            ["Mass Gainer", "Calorie-dense option when increasing food intake is difficult."],
+            ["Whey Protein Concentrate", "Convenient way to help reach protein needs."],
+            ["High-Calorie Oat Shake", "Food-based calorie option for increasing intake."]
+        ],
+
+        veryHigh: [
+            ["Mass Gainer", useSpeed],
+            ["Meal Replacement Powder", "Convenient calorie/protein option when a full meal is difficult."],
+            ["Oat Powder", "Adds substantial carbohydrates and calories to meals or shakes."]
+        ],
+
+        aggressive: [
+            ["Mass Gainer", useSpeed],
+            ["Meal Replacement Powder", "Convenient calorie/protein option when food volume is difficult."],
+            ["Maltodextrin", "Concentrated carbohydrate option when additional calories are required."]
+        ],
+
+        extreme: [
+            ["Mass Gainer", "Calorie-dense option, but a target this large should not depend on supplements alone."],
+            ["Meal Replacement Powder", "Convenient calorie/protein option when appropriate."],
+            ["High-Calorie Oat Shake", "Food-based calorie option; use as part of a structured nutrition plan."]
+        ]
     };
 
+    return sets[planType]
+        .map(([name, usageOverride]) => {
+            const item = findSupplement(name);
+            return item ? { ...item, usageOverride } : null;
+        })
+        .filter(Boolean);
 }
 
-
-/* =========================================================
-   6. FIND SUPPLEMENT
-========================================================= */
-
-function findSupplement(name) {
-
-    return supplements.find(
-        item => item.name === name
-    );
-
+/* ---------- chart ---------- */
+function destroyCharts() {
+    Object.values(macroCharts).forEach(chart => {
+        try { chart.destroy(); } catch (e) {}
+    });
+    macroCharts = {};
 }
 
+function createMacroChart(canvasId, macros) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || typeof Chart === "undefined") return;
 
-/* =========================================================
-   7. DYNAMIC RECOMMENDATION ENGINE
-========================================================= */
-
-function getRecommendations(planType) {
-
-    /*
-        Every plan type now has a DIFFERENT set
-        of recommendations.
-    */
-
-
-    /* -----------------------------------------
-       LIGHT
-    ----------------------------------------- */
-
-    if (planType === "light") {
-
-        return [
-
-            {
-                ...findSupplement(
-                    "Whey Protein Isolate"
-                ),
-
-                usageOverride:
-                    "Use only if your normal diet does not provide enough protein."
-            },
-
-            {
-                ...findSupplement(
-                    "Casein Protein"
-                ),
-
-                usageOverride:
-                    "Optional slow-digesting protein source for convenient protein intake."
-            },
-
-            {
-                ...findSupplement(
-                    "Plant Protein Blend"
-                ),
-
-                usageOverride:
-                    "Alternative option if you prefer a plant-based protein source."
+    const ctx = canvas.getContext("2d");
+    const chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: ["Carbs", "Protein", "Fats"],
+            datasets: [{
+                data: macros,
+                backgroundColor: ["#00F2FE", "#00FF87", "#3B82F6"],
+                borderColor: "#0B0E14",
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "66%",
+            plugins: {
+                legend: { display: false }
             }
+        }
+    });
 
-        ];
-
-    }
-
-
-    /* -----------------------------------------
-       LEAN
-    ----------------------------------------- */
-
-    if (planType === "lean") {
-
-        return [
-
-            {
-                ...findSupplement(
-                    "Whey Protein Isolate"
-                ),
-
-                usageOverride:
-                    "Use to help reach your daily protein target when food alone is inconvenient."
-            },
-
-            {
-                ...findSupplement(
-                    "Oat Powder"
-                ),
-
-                usageOverride:
-                    "Add to a shake or meal when additional calories are required."
-            },
-
-            {
-                ...findSupplement(
-                    "Casein Protein"
-                ),
-
-                usageOverride:
-                    "Optional slower protein source between meals or before sleep."
-            }
-
-        ];
-
-    }
-
-
-    /* -----------------------------------------
-       MODERATE
-    ----------------------------------------- */
-
-    if (planType === "moderate") {
-
-        return [
-
-            {
-                ...findSupplement(
-                    "Whey Protein Concentrate"
-                ),
-
-                usageOverride:
-                    "Convenient protein source to help meet daily protein needs."
-            },
-
-            {
-                ...findSupplement(
-                    "Oat Powder"
-                ),
-
-                usageOverride:
-                    "Add carbohydrates and calories to meals or shakes."
-            },
-
-            {
-                ...findSupplement(
-                    "Creatine Monohydrate"
-                ),
-
-                usageOverride:
-                    "Performance supplement that can complement resistance training."
-            }
-
-        ];
-
-    }
-
-
-    /* -----------------------------------------
-       HIGH
-    ----------------------------------------- */
-
-    if (planType === "high") {
-
-        return [
-
-            {
-                ...findSupplement(
-                    "Mass Gainer"
-                ),
-
-                usageOverride:
-                    "Calorie-dense option when normal food intake is difficult to increase."
-            },
-
-            {
-                ...findSupplement(
-                    "Whey Protein Concentrate"
-                ),
-
-                usageOverride:
-                    "Use as a convenient protein source alongside normal meals."
-            },
-
-            {
-                ...findSupplement(
-                    "Oat Powder"
-                ),
-
-                usageOverride:
-                    "Useful for increasing carbohydrate and calorie intake through shakes or meals."
-            }
-
-        ];
-
-    }
-
-
-    /* -----------------------------------------
-       AGGRESSIVE
-    ----------------------------------------- */
-
-    if (planType === "aggressive") {
-
-        return [
-
-            {
-                ...findSupplement(
-                    "Mass Gainer"
-                ),
-
-                usageOverride:
-                    "High-calorie option for situations where reaching calorie intake through food is difficult."
-            },
-
-            {
-                ...findSupplement(
-                    "Meal Replacement Powder"
-                ),
-
-                usageOverride:
-                    "Convenient calorie and protein source when a normal meal is unavailable."
-            },
-
-            {
-                ...findSupplement(
-                    "Maltodextrin"
-                ),
-
-                usageOverride:
-                    "Concentrated carbohydrate option; use carefully because it adds calories quickly."
-            }
-
-        ];
-
-    }
-
-
-    return [];
-
+    macroCharts[canvasId] = chart;
 }
 
-
-/* =========================================================
-   8. PLAN DESCRIPTION
-========================================================= */
-
-function getPlanDescription(
-    planType,
-    weightDifference,
-    dailyRate,
-    days
-) {
-
-    const gain =
-        formatNumber(
-            weightDifference,
-            1
-        );
-
-    const rate =
-        formatNumber(
-            dailyRate,
-            3
-        );
-
-
-    if (planType === "light") {
-
-        return `
-            Target difference: <strong>${gain} kg</strong>.
-            This is a small planned increase, so the system focuses
-            mainly on protein-support options rather than high-calorie
-            gainers.
-        `;
-
-    }
-
-
-    if (planType === "lean") {
-
-        return `
-            Target difference: <strong>${gain} kg</strong>
-            at approximately <strong>${rate} kg/day</strong>.
-            The plan emphasizes protein plus moderate calorie support.
-        `;
-
-    }
-
-
-    if (planType === "moderate") {
-
-        return `
-            Target difference: <strong>${gain} kg</strong>
-            at approximately <strong>${rate} kg/day</strong>.
-            The plan combines protein, calorie support and training support.
-        `;
-
-    }
-
-
-    if (planType === "high") {
-
-        return `
-            Target difference: <strong>${gain} kg</strong>
-            requires approximately <strong>${rate} kg/day</strong>.
-            Calorie-dense options become more prominent.
-        `;
-
-    }
-
-
-    if (planType === "aggressive") {
-
-        return `
-            Target difference: <strong>${gain} kg</strong>
-            requires approximately <strong>${rate} kg/day</strong>.
-            The requested timeline creates a high required gain rate,
-            so calorie-dense options are highlighted.
-        `;
-
-    }
-
+/* ---------- recommendation card ---------- */
+function createRecommendationCard(item, index) {
+    const canvasId = `macroChart_${item.id}_${index}_${Date.now()}`;
 
     return `
-        Your target weight is not above your current weight.
-    `;
-
-}
-
-
-/* =========================================================
-   9. CHART CREATOR
-========================================================= */
-
-function createMacroChart(
-    canvasId,
-    macros
-) {
-
-    const canvas =
-        document.getElementById(canvasId);
-
-    if (!canvas) {
-        return;
-    }
-
-
-    if (macroCharts[canvasId]) {
-
-        macroCharts[canvasId].destroy();
-
-    }
-
-
-    const ctx =
-        canvas.getContext("2d");
-
-
-    macroCharts[canvasId] =
-        new Chart(
-            ctx,
-            {
-
-                type: "doughnut",
-
-                data: {
-
-                    labels: [
-                        "Carbs",
-                        "Protein",
-                        "Fats"
-                    ],
-
-                    datasets: [
-
-                        {
-
-                            data: macros,
-
-                            backgroundColor: [
-                                "#00F2FE",
-                                "#00FF87",
-                                "#3B82F6"
-                            ],
-
-                            borderColor: "#101722",
-
-                            borderWidth: 3,
-
-                            hoverOffset: 5
-
-                        }
-
-                    ]
-
-                },
-
-                options: {
-
-                    responsive: true,
-
-                    maintainAspectRatio: false,
-
-                    cutout: "70%",
-
-                    plugins: {
-
-                        legend: {
-                            display: false
-                        },
-
-                        tooltip: {
-
-                            callbacks: {
-
-                                label: function(context) {
-
-                                    return (
-                                        context.label +
-                                        ": " +
-                                        context.raw +
-                                        "%"
-                                    );
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                }
-
-            }
-        );
-
-}
-
-
-/* =========================================================
-   10. CREATE RECOMMENDATION CARD
-========================================================= */
-
-function createRecommendationCard(
-    supplement,
-    index
-) {
-
-    const chartId =
-        `macroChart_${supplement.id}_${index}`;
-
-
-    let badgeClass =
-        "performance";
-
-
-    if (
-        supplement.filter === "direct"
-    ) {
-
-        badgeClass = "direct";
-
-    }
-
-
-    if (
-        supplement.filter === "indirect"
-    ) {
-
-        badgeClass = "indirect";
-
-    }
-
-
-    return `
-
         <article class="recommend-card fade-in">
-
             <div class="recommend-top">
-
                 <div>
-
-                    <div class="category">
-                        ${supplement.category}
-                    </div>
-
-                    <div class="product-title">
-                        ${supplement.name}
-                    </div>
-
+                    <div class="category">${item.category}</div>
+                    <div class="product-title">${item.name}</div>
                 </div>
-
-                <div class="product-icon">
-                    ${supplement.icon}
-                </div>
-
+                <div class="product-icon">${item.icon}</div>
             </div>
 
-
-            <div class="badge ${badgeClass}">
-                ${supplement.badge}
+            <div class="badge ${item.filter}">
+                ${item.badge}
             </div>
 
+            <p class="description">${item.description}</p>
 
             <p class="usage">
-                ${supplement.description}
+                <strong>Suggested use:</strong>
+                ${item.usageOverride || item.usage}
             </p>
-
-
-            <p class="usage">
-
-                <strong>Usage:</strong>
-
-                ${
-                    supplement.usageOverride ||
-                    supplement.usage
-                }
-
-            </p>
-
 
             <div class="macro-area">
-
-                <div class="chart-holder">
-
-                    <canvas
-                        id="${chartId}"
-                    ></canvas>
-
+                <div class="macro-chart">
+                    <canvas id="${canvasId}"></canvas>
                 </div>
 
-
-                <div class="macro-legend">
-
-                    <div class="macro-item">
-
-                        <div class="macro-left">
-
-                            <span
-                                class="dot"
-                                style="background:#00F2FE"
-                            ></span>
-
-                            Carbs
-
-                        </div>
-
-                        <strong>
-                            ${supplement.macros[0]}%
-                        </strong>
-
+                <div class="macro-list">
+                    <div>
+                        <span><i class="dot" style="background:#00F2FE"></i>Carbs</span>
+                        <strong>${item.macros[0]}%</strong>
                     </div>
-
-
-                    <div class="macro-item">
-
-                        <div class="macro-left">
-
-                            <span
-                                class="dot"
-                                style="background:#00FF87"
-                            ></span>
-
-                            Protein
-
-                        </div>
-
-                        <strong>
-                            ${supplement.macros[1]}%
-                        </strong>
-
+                    <div>
+                        <span><i class="dot" style="background:#00FF87"></i>Protein</span>
+                        <strong>${item.macros[1]}%</strong>
                     </div>
-
-
-                    <div class="macro-item">
-
-                        <div class="macro-left">
-
-                            <span
-                                class="dot"
-                                style="background:#3B82F6"
-                            ></span>
-
-                            Fats
-
-                        </div>
-
-                        <strong>
-                            ${supplement.macros[2]}%
-                        </strong>
-
+                    <div>
+                        <span><i class="dot" style="background:#3B82F6"></i>Fats</span>
+                        <strong>${item.macros[2]}%</strong>
                     </div>
-
                 </div>
-
             </div>
-
         </article>
-
     `;
-
 }
 
-
-/* =========================================================
-   11. RENDER DYNAMIC RECOMMENDATIONS
-========================================================= */
-
-function renderRecommendations(
-    plan,
-    weightDifference,
-    dailyRate,
-    days
-) {
-
+/* ---------- render recommendations ---------- */
+function renderRecommendations(plan, difference, dailyGain, days) {
+    destroyCharts();
     recommendationGrid.innerHTML = "";
 
-
-    /* -----------------------------------------
-       NO GAIN
-    ----------------------------------------- */
-
-    if (
-        plan.type === "maintenance"
-    ) {
-
+    if (plan.type === "maintenance") {
         recommendationSubtitle.innerHTML = `
-            Your target weight is equal to or below
-            your current weight.
+            Your target weight is equal to or below your current weight.
         `;
-
 
         recommendationGrid.innerHTML = `
-
-            <div
-                class="recommend-card fade-in"
-                style="grid-column:1/-1"
-            >
-
+            <div class="recommend-card fade-in" style="grid-column:1/-1">
                 <div class="recommend-top">
-
                     <div>
-
-                        <div class="category">
-                            TARGET STATUS
-                        </div>
-
-                        <div class="product-title">
-                            No Weight Gain Required
-                        </div>
-
+                        <div class="category">TARGET STATUS</div>
+                        <div class="product-title">No Weight Gain Required</div>
                     </div>
-
-                    <div class="product-icon">
-                        🎯
-                    </div>
-
+                    <div class="product-icon">🎯</div>
                 </div>
-
-
                 <p class="usage">
-
                     Current weight:
-                    <strong>
-                        ${formatNumber(
-                            parseFloat(
-                                currentWeightInput.value
-                            ),
-                            1
-                        )} kg
-                    </strong>
-
+                    <strong>${formatNumber(num(currentWeightInput.value), 1)} kg</strong>
                     <br><br>
-
                     Target weight:
-                    <strong>
-                        ${formatNumber(
-                            parseFloat(
-                                targetWeightInput.value
-                            ),
-                            1
-                        )} kg
-                    </strong>
-
-                    <br><br>
-
-                    Increase your target weight if you
-                    want to use the weight-gain planner.
-
+                    <strong>${formatNumber(num(targetWeightInput.value), 1)} kg</strong>
                 </p>
-
             </div>
-
         `;
-
         return;
     }
-
-
-    /* -----------------------------------------
-       GET NEW RECOMMENDATIONS
-    ----------------------------------------- */
-
-    const recommendations =
-        getRecommendations(
-            plan.type
-        );
-
-
-    /* -----------------------------------------
-       UPDATE HEADER
-    ----------------------------------------- */
 
     recommendationSubtitle.innerHTML = `
-
-        <strong style="color:#00F2FE">
-            ${plan.title}
-        </strong>
-
-        • You want to gain
-
-        <strong style="color:#00FF87">
-            ${formatNumber(
-                weightDifference,
-                1
-            )} kg
-        </strong>
-
-        in
-
-        <strong style="color:#00F2FE">
-            ${days} days
-        </strong>
-
-        (${formatNumber(
-            dailyRate,
-            3
-        )} kg/day).
-
+        <strong style="color:#00F2FE">${plan.title}</strong>
+        • Total required gain:
+        <strong style="color:#00FF87">${formatNumber(difference, 1)} kg</strong>
+        • Timeline:
+        <strong style="color:#00F2FE">${days} days</strong>
+        • Required rate:
+        <strong style="color:#00FF87">${formatNumber(dailyGain, 3)} kg/day</strong>
     `;
 
+    const recommendations = getRecommendations(plan.type, dailyGain);
 
-    /* -----------------------------------------
-       CREATE CARDS
-    ----------------------------------------- */
+    recommendations.forEach((item, index) => {
+        recommendationGrid.innerHTML += createRecommendationCard(item, index);
+    });
 
-    recommendations.forEach(
-        (supplement, index) => {
-
-            recommendationGrid.innerHTML +=
-
-                createRecommendationCard(
-                    supplement,
-                    index
-                );
-
+    recommendations.forEach((item, index) => {
+        const canvasId = [...recommendationGrid.querySelectorAll("canvas")][index]?.id;
+        if (canvasId) {
+            createMacroChart(canvasId, item.macros);
         }
-    );
-
-
-    /* -----------------------------------------
-       CREATE CHARTS
-    ----------------------------------------- */
-
-    recommendations.forEach(
-        (supplement, index) => {
-
-            setTimeout(
-                () => {
-
-                    createMacroChart(
-
-                        `macroChart_${supplement.id}_${index}`,
-
-                        supplement.macros
-
-                    );
-
-                },
-
-                50
-
-            );
-
-        }
-    );
-
+    });
 }
 
-
-/* =========================================================
-   12. MAIN PLANNER FUNCTION
-========================================================= */
-
+/* ---------- main calculation ---------- */
 function calculatePlanner() {
+    const current = num(currentWeightInput.value);
+    const target = num(targetWeightInput.value);
 
-    let current =
-        parseFloat(
-            currentWeightInput.value
-        );
+    if (current < 20 || target < 20) return;
 
+    const difference = target - current;
+    const dailyGain = difference / selectedDays;
+    const surplus = difference > 0 ? dailyGain * 7700 : 0;
 
-    let target =
-        parseFloat(
-            targetWeightInput.value
-        );
+    timeTarget.textContent = `~${selectedDays} Days`;
 
+    gainRate.textContent =
+        `${difference > 0 ? "+" : ""}${formatNumber(dailyGain, 3)} kg/day`;
 
-    /* -----------------------------------------
-       VALIDATION
-    ----------------------------------------- */
-
-    if (
-        isNaN(current) ||
-        current < 20
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        isNaN(target) ||
-        target < 20
-    ) {
-
-        return;
-
-    }
-
-
-    /* -----------------------------------------
-       WEIGHT DIFFERENCE
-    ----------------------------------------- */
-
-    const weightDifference =
-        calculateWeightDifference(
-            current,
-            target
-        );
-
-
-    /* -----------------------------------------
-       DAILY RATE
-    ----------------------------------------- */
-
-    const dailyRate =
-        calculateDailyGain(
-            current,
-            target,
-            selectedDays
-        );
-
-
-    /* -----------------------------------------
-       CALORIE SURPLUS
-    ----------------------------------------- */
-
-    const surplus =
-        calculateSurplus(
-            dailyRate
-        );
-
-
-    /* -----------------------------------------
-       UPDATE TOP STATS
-    ----------------------------------------- */
-
-    timeTarget.textContent =
-        `~${selectedDays} Days`;
-
-
-    if (
-        weightDifference > 0
-    ) {
-
-        gainRate.textContent =
-            `+${formatNumber(
-                dailyRate,
-                3
-            )} kg/day`;
-
-    } else {
-
-        gainRate.textContent =
-            `${formatNumber(
-                dailyRate,
-                3
-            )} kg/day`;
-
-    }
-
-
-    if (
+    calorieSurplus.textContent =
         surplus > 0
-    ) {
+            ? `+${Math.round(surplus).toLocaleString()} kcal/day`
+            : "0 kcal/day";
 
-        calorieSurplus.textContent =
-            `+${Math.round(
-                surplus
-            ).toLocaleString()} kcal/day`;
-
-    } else {
-
-        calorieSurplus.textContent =
-            `0 kcal/day`;
-
-    }
-
-
-    /* -----------------------------------------
-       DETERMINE PLAN
-       USING BOTH DIFFERENCE + RATE
-    ----------------------------------------- */
-
-    const plan =
-        determinePlanType(
-            weightDifference,
-            dailyRate,
-            selectedDays
-        );
-
-
-    /* -----------------------------------------
-       UPDATE RECOMMENDATIONS
-    ----------------------------------------- */
+    const plan = determinePlan(difference, selectedDays);
 
     renderRecommendations(
-
         plan,
-
-        weightDifference,
-
-        dailyRate,
-
+        difference,
+        dailyGain,
         selectedDays
-
     );
-
 }
 
+/* ---------- timeline ---------- */
+document.querySelectorAll(".timeline-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        document.querySelectorAll(".timeline-btn")
+            .forEach(btn => btn.classList.remove("active"));
 
-/* =========================================================
-   13. TIMELINE BUTTONS
-========================================================= */
+        this.classList.add("active");
+        selectedDays = parseInt(this.dataset.days, 10) || 30;
 
-document
-    .querySelectorAll(".timeline-btn")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                document
-                    .querySelectorAll(
-                        ".timeline-btn"
-                    )
-                    .forEach(btn => {
-
-                        btn.classList.remove(
-                            "active"
-                        );
-
-                    });
-
-
-                this.classList.add(
-                    "active"
-                );
-
-
-                selectedDays =
-                    parseInt(
-                        this.dataset.days
-                    );
-
-
-                calculatePlanner();
-
-            }
-        );
-
+        calculatePlanner();
     });
+});
 
+/* ---------- live weight updates ---------- */
+currentWeightInput.addEventListener("input", calculatePlanner);
+targetWeightInput.addEventListener("input", calculatePlanner);
 
-/* =========================================================
-   14. REAL-TIME WEIGHT INPUT
-========================================================= */
-
-currentWeightInput.addEventListener(
-    "input",
-    calculatePlanner
-);
-
-
-targetWeightInput.addEventListener(
-    "input",
-    calculatePlanner
-);
-
-
-/* =========================================================
-   15. DIRECTORY
-========================================================= */
-
+/* ---------- directory ---------- */
 function renderDirectory() {
-
     directoryList.innerHTML = "";
 
+    const filtered = supplements.filter(item => {
+        const text = (
+            item.name + " " +
+            item.category + " " +
+            item.description
+        ).toLowerCase();
 
-    const filtered =
-        supplements.filter(item => {
+        const matchesSearch = text.includes(searchTerm.toLowerCase());
+        const matchesFilter =
+            activeFilter === "all" ||
+            item.filter === activeFilter;
 
-            const text =
-                (
-                    item.name +
-                    " " +
-                    item.category +
-                    " " +
-                    item.description
-                ).toLowerCase();
+        return matchesSearch && matchesFilter;
+    });
 
-
-            const matchesSearch =
-                text.includes(
-                    searchTerm.toLowerCase()
-                );
-
-
-            const matchesFilter =
-                activeFilter === "all" ||
-                item.filter === activeFilter;
-
-
-            return (
-                matchesSearch &&
-                matchesFilter
-            );
-
-        });
-
-
-    if (
-        filtered.length === 0
-    ) {
-
+    if (!filtered.length) {
         directoryList.innerHTML = `
-
-            <div class="empty">
-                No supplements found.
-            </div>
-
+            <div class="empty">No supplements found.</div>
         `;
-
         return;
-
     }
-
 
     filtered.forEach(item => {
-
-        let badgeClass =
-            "performance";
-
-
-        if (
-            item.filter === "direct"
-        ) {
-
-            badgeClass = "direct";
-
-        }
-
-
-        if (
-            item.filter === "indirect"
-        ) {
-
-            badgeClass = "indirect";
-
-        }
-
+        let badgeClass = "performance";
+        if (item.filter === "direct") badgeClass = "direct";
+        if (item.filter === "indirect") badgeClass = "indirect";
 
         directoryList.innerHTML += `
-
             <div class="directory-row fade-in">
-
                 <div class="directory-name">
-
-                    ${item.icon}
-
-                    ${item.name}
-
+                    ${item.icon} ${item.name}
                 </div>
-
-
                 <div class="directory-category">
-
                     ${item.category}
-
                 </div>
-
-
                 <div class="directory-use">
-
                     ${item.effect}
-
                 </div>
-
-
                 <div class="directory-badge">
-
-                    <span
-                        class="badge ${badgeClass}"
-                    >
-
+                    <span class="badge ${badgeClass}">
                         ${item.badge}
-
                     </span>
-
                 </div>
-
             </div>
-
         `;
-
     });
-
 }
 
+searchInput.addEventListener("input", function () {
+    searchTerm = this.value.trim();
+    renderDirectory();
+});
 
-/* =========================================================
-   16. SEARCH
-========================================================= */
+document.querySelectorAll(".filter-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        document.querySelectorAll(".filter-btn")
+            .forEach(btn => btn.classList.remove("active"));
 
-searchInput.addEventListener(
-    "input",
-    function() {
-
-        searchTerm =
-            this.value.trim();
-
+        this.classList.add("active");
+        activeFilter = this.dataset.filter;
         renderDirectory();
-
-    }
-);
-
-
-/* =========================================================
-   17. FILTER BUTTONS
-========================================================= */
-
-document
-    .querySelectorAll(".filter-btn")
-    .forEach(button => {
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                document
-                    .querySelectorAll(
-                        ".filter-btn"
-                    )
-                    .forEach(btn => {
-
-                        btn.classList.remove(
-                            "active"
-                        );
-
-                    });
-
-
-                this.classList.add(
-                    "active"
-                );
-
-
-                activeFilter =
-                    this.dataset.filter;
-
-
-                renderDirectory();
-
-            }
-        );
-
     });
+});
 
-
-/* =========================================================
-   18. INITIAL LOAD
-========================================================= */
-
+/* ---------- initial load ---------- */
 renderDirectory();
-
 calculatePlanner();
-
 </script>
+
 
 </body>
 </html>
