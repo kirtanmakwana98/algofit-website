@@ -1,0 +1,3103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ALGOFIT | Weight Gain Planner</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --bg2: #0d0d12;
+            --card: rgba(18, 24, 38, 0.76);
+            --card2: rgba(14, 20, 32, 0.88);
+
+            --cyan: #00f2fe;
+            --blue: #4facfe;
+            --green: #00ff87;
+            --green2: #00e676;
+            --soft-blue: #3b82f6;
+
+            --text: #f4f8ff;
+            --muted: #8c98ad;
+            --border: rgba(0, 242, 254, 0.18);
+
+            --danger: #ff5577;
+            --yellow: #facc15;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+            color: var(--text);
+            background:
+                radial-gradient(circle at 15% 10%, rgba(0, 242, 254, 0.08), transparent 30%),
+                radial-gradient(circle at 85% 20%, rgba(0, 255, 135, 0.06), transparent 28%),
+                radial-gradient(circle at 50% 90%, rgba(59, 130, 246, 0.06), transparent 30%),
+                var(--bg);
+
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* =========================
+           HEX GRID BACKGROUND
+        ========================== */
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -3;
+
+            opacity: 0.16;
+
+            background-image:
+                linear-gradient(30deg, #111923 12%, transparent 12.5%, transparent 87%, #111923 87.5%, #111923),
+                linear-gradient(150deg, #111923 12%, transparent 12.5%, transparent 87%, #111923 87.5%, #111923),
+                linear-gradient(30deg, #111923 12%, transparent 12.5%, transparent 87%, #111923 87.5%, #111923),
+                linear-gradient(150deg, #111923 12%, transparent 12.5%, transparent 87%, #111923 87.5%, #111923),
+                linear-gradient(60deg, #111923 25%, transparent 25.5%, transparent 75%, #111923 75%);
+
+            background-size: 80px 140px;
+            background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0;
+        }
+
+        /* Ambient glow */
+        .ambient {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            z-index: -2;
+            opacity: 0.18;
+        }
+
+        .ambient.one {
+            width: 280px;
+            height: 280px;
+            background: var(--cyan);
+            top: 8%;
+            left: -100px;
+        }
+
+        .ambient.two {
+            width: 300px;
+            height: 300px;
+            background: var(--green);
+            top: 48%;
+            right: -120px;
+        }
+
+        .ambient.three {
+            width: 240px;
+            height: 240px;
+            background: var(--blue);
+            bottom: 5%;
+            left: 40%;
+        }
+
+        /* =========================
+           PARTICLES
+        ========================== */
+
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--cyan);
+            opacity: 0.45;
+            box-shadow: 0 0 10px var(--cyan);
+            animation: floatParticle 10s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { left: 8%; top: 20%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; top: 65%; animation-delay: 2s; }
+        .particle:nth-child(3) { left: 35%; top: 15%; animation-delay: 4s; }
+        .particle:nth-child(4) { left: 50%; top: 75%; animation-delay: 1s; }
+        .particle:nth-child(5) { left: 65%; top: 30%; animation-delay: 3s; }
+        .particle:nth-child(6) { left: 78%; top: 70%; animation-delay: 5s; }
+        .particle:nth-child(7) { left: 90%; top: 20%; animation-delay: 2s; }
+        .particle:nth-child(8) { left: 42%; top: 45%; animation-delay: 6s; }
+
+        @keyframes floatParticle {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: translateY(-35px) translateX(20px);
+                opacity: 0.8;
+            }
+        }
+
+        /* =========================
+           NAVBAR
+        ========================== */
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            background: rgba(7, 10, 16, 0.78);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 242, 254, 0.12);
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 17px 20px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: 1px;
+
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-icon {
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+
+            color: var(--cyan);
+            -webkit-text-fill-color: var(--cyan);
+
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.12);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.25s;
+        }
+
+        .nav-links a:hover {
+            color: var(--cyan);
+        }
+
+        /* =========================
+           MAIN
+        ========================== */
+
+        .container-main {
+            width: min(1200px, calc(100% - 30px));
+            margin: auto;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 65px 10px 40px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+
+            padding: 7px 14px;
+            border-radius: 999px;
+
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+
+            color: var(--cyan);
+            background: rgba(0, 242, 254, 0.06);
+            border: 1px solid rgba(0, 242, 254, 0.18);
+        }
+
+        .eyebrow span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 12px var(--green);
+        }
+
+        .hero h1 {
+            margin-top: 18px;
+
+            font-size: clamp(34px, 6vw, 62px);
+            line-height: 1.05;
+            font-weight: 900;
+            letter-spacing: -2px;
+
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                var(--cyan),
+                var(--green)
+            );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 18px auto 0;
+
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* =========================
+           GLASS CARDS
+        ========================== */
+
+        .glass {
+            background: linear-gradient(
+                145deg,
+                rgba(20, 28, 43, 0.80),
+                rgba(10, 15, 25, 0.82)
+            );
+
+            border: 1px solid var(--border);
+            border-radius: 22px;
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.25),
+                inset 0 1px rgba(255, 255, 255, 0.025);
+
+            transition:
+                transform 0.3s ease,
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        .glass:hover {
+            border-color: rgba(0, 242, 254, 0.28);
+        }
+
+        .section-card {
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .section-number {
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.2);
+
+            color: var(--cyan);
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .section-title h2 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .section-title p {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        /* =========================
+           FORM
+        ========================== */
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+
+            font-size: 12px;
+            font-weight: 700;
+            color: #aeb9ca;
+
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap input {
+            width: 100%;
+            height: 55px;
+
+            border-radius: 13px;
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 10, 18, 0.7);
+
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+
+            padding: 0 65px 0 16px;
+
+            outline: none;
+
+            transition: 0.25s;
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--cyan);
+
+            box-shadow:
+                0 0 0 3px rgba(0, 242, 254, 0.08),
+                0 0 25px rgba(0, 242, 254, 0.08);
+        }
+
+        .unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            color: var(--cyan);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        /* =========================
+           TIMELINE
+        ========================== */
+
+        .timeline {
+            margin-top: 24px;
+        }
+
+        .timeline-label {
+            color: #aeb9ca;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .timeline-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .timeline-btn {
+            min-height: 60px;
+
+            border-radius: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            background: rgba(5, 10, 18, 0.62);
+
+            color: #9da8ba;
+
+            cursor: pointer;
+            transition: 0.25s;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-btn strong {
+            font-size: 17px;
+            color: #fff;
+        }
+
+        .timeline-btn span {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+
+        .timeline-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 242, 254, 0.35);
+        }
+
+        .timeline-btn.active {
+            color: #04120d;
+
+            background: linear-gradient(
+                135deg,
+                var(--green),
+                var(--green2)
+            );
+
+            border-color: var(--green);
+
+            box-shadow:
+                0 0 25px rgba(0, 255, 135, 0.22),
+                inset 0 0 12px rgba(255, 255, 255, 0.12);
+        }
+
+        .timeline-btn.active strong {
+            color: #04120d;
+        }
+
+        /* =========================
+           STATS
+        ========================== */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+
+            margin-top: 24px;
+        }
+
+        .stat-box {
+            padding: 17px;
+
+            border-radius: 15px;
+            background: rgba(5, 10, 18, 0.56);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat-label {
+            color: #7e899d;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .stat-value {
+            margin-top: 7px;
+
+            font-size: 19px;
+            font-weight: 900;
+
+            background: linear-gradient(
+                90deg,
+                var(--cyan),
+                var(--green)
+            );
+
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-description {
+            color: #667287;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+
+        /* =========================
+           RECOMMENDATION CARDS
+        ========================== */
+
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .recommend-card {
+            position: relative;
+            overflow: hidden;
+
+            padding: 20px;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(20, 29, 44, 0.9),
+                    rgba(9, 14, 24, 0.9)
+                );
+
+            border: 1px solid rgba(0, 242, 254, 0.12);
+
+            transition: 0.3s;
+        }
+
+        .recommend-card::before {
+            content: "";
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            top: -50px;
+            right: -50px;
+
+            border-radius: 50%;
+            background: var(--cyan);
+            filter: blur(55px);
+            opacity: 0.12;
+        }
+
+        .recommend-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 242, 254, 0.35);
+
+            box-shadow:
+                0 20px 45px rgba(0, 0, 0, 0.25),
+                0 0 25px rgba(0, 242, 254, 0.05);
+        }
+
+        .recommend-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .product-icon {
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            background: rgba(0, 242, 254, 0.07);
+            border: 1px solid rgba(0, 242, 254, 0.16);
+
+            font-size: 20px;
+        }
+
+        .category {
+            font-size: 9px;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+        }
+
+        .product-title {
+            margin-top: 5px;
+            font-size: 16px;
+            font-weight: 850;
+        }
+
+        .badge {
+            display: inline-flex;
+            margin-top: 14px;
+
+            padding: 5px 9px;
+            border-radius: 999px;
+
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .badge.direct {
+            color: var(--green);
+            background: rgba(0, 255, 135, 0.07);
+            border: 1px solid rgba(0, 255, 135, 0.18);
+        }
+
+        .badge.indirect {
+            color: #facc15;
+            background: rgba(250, 204, 21, 0.06);
+            border: 1px solid rgba(250, 204, 21, 0.16);
+        }
+
+        .badge.performance {
+            color: var(--blue);
+            background: rgba(59, 130, 246, 0.07);
+            border: 1px solid rgba(59, 130, 246, 0.18);
+        }
+
+        .usage {
+            margin-top: 14px;
+            color: #c0cad8;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .usage strong {
+            color: #fff;
+        }
+
+        .macro-area {
+            display: grid;
+            grid-template-columns: 105px 1fr;
+            align-items: center;
+            gap: 15px;
+
+            margin-top: 16px;
+            padding-top: 15px;
+
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .chart-holder {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .macro-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .macro-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            font-size: 10px;
+            color: #8995a8;
+        }
+
+        .macro-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .macro-item strong {
+            color: #e7edf7;
+        }
+
+        /* =========================
+           DIRECTORY
+        ========================== */
+
+        .directory-toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .search {
+            flex: 1;
+            min-width: 220px;
+
+            height: 48px;
+            border-radius: 12px;
+
+            background: rgba(5, 10, 18, 0.65);
+            border: 1px solid rgba(255,255,255,0.07);
+
+            padding: 0 15px;
+
+            color: #fff;
+            outline: none;
+
+            transition: 0.2s;
+        }
+
+        .search:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px rgba(0,242,254,0.07);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(5,10,18,0.65);
+
+            color: #8792a6;
+
+            border-radius: 10px;
+            padding: 0 13px;
+
+            height: 48px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            color: var(--cyan);
+            border-color: rgba(0,242,254,0.25);
+            background: rgba(0,242,254,0.05);
+        }
+
+        .directory-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .directory-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+
+            align-items: center;
+            gap: 12px;
+
+            padding: 14px 16px;
+
+            border-radius: 12px;
+
+            background: rgba(5,10,18,0.42);
+            border: 1px solid rgba(255,255,255,0.045);
+
+            transition: 0.2s;
+        }
+
+        .directory-row:hover {
+            border-color: rgba(0,242,254,0.15);
+            background: rgba(0,242,254,0.025);
+        }
+
+        .directory-name {
+            font-weight: 750;
+            font-size: 12px;
+        }
+
+        .directory-category {
+            font-size: 10px;
+            color: var(--muted);
+        }
+
+        .directory-use {
+            color: #9ba6b8;
+            font-size: 10px;
+        }
+
+        .directory-badge {
+            justify-self: start;
+        }
+
+        /* =========================
+           NOTICE
+        ========================== */
+
+        .notice {
+            margin: 20px 0 50px;
+
+            padding: 16px 18px;
+
+            border-radius: 14px;
+
+            color: #8894a7;
+            font-size: 11px;
+            line-height: 1.65;
+
+            background: rgba(59,130,246,0.04);
+            border: 1px solid rgba(59,130,246,0.12);
+        }
+
+        .notice strong {
+            color: #b8c5d8;
+        }
+
+        /* =========================
+           EMPTY STATE
+        ========================== */
+
+        .empty {
+            padding: 30px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================
+           ANIMATION
+        ========================== */
+
+        .fade-in {
+            animation: fadeIn 0.45s ease both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        footer {
+            text-align: center;
+            padding: 0 20px 35px;
+            color: #4f5b6e;
+            font-size: 11px;
+        }
+
+        footer span {
+            color: var(--cyan);
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 900px) {
+            .recommendations {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .directory-row {
+                grid-template-columns: 2fr 1fr 1fr;
+            }
+
+            .directory-use {
+                display: none;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 45px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recommendations {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .directory-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .directory-category {
+                text-align: right;
+            }
+
+            .directory-badge {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .container-main {
+                width: min(100% - 20px, 1200px);
+            }
+
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .macro-area {
+                grid-template-columns: 90px 1fr;
+            }
+
+            .chart-holder {
+                width: 90px;
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Ambient background -->
+    <div class="ambient one"></div>
+    <div class="ambient two"></div>
+    <div class="ambient three"></div>
+
+    <!-- Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- =========================
+         NAVBAR
+    ========================== -->
+
+    <nav class="navbar">
+        <div class="nav-inner">
+
+            <div class="logo">
+                <div class="logo-icon">♥</div>
+                ALGOFIT
+            </div>
+
+            <div class="logo">
+
+                <a href="index.html">Home</a>
+            </div>
+            <div class="nav-links">
+                
+                <a href="#planner">Weight Planner</a>
+                <a href="#recommendations">Supplements</a>
+                <a href="#directory">Directory</a>
+            </div>
+
+        </div>
+    </nav>
+
+
+    <main class="container-main">
+
+        <!-- =========================
+             HERO
+        ========================== -->
+
+        <section class="hero">
+
+            <div class="eyebrow">
+                <span></span>
+                SMART WEIGHT GAIN PLANNER
+            </div>
+
+            <h1>WEIGHT GAIN<br>SUPPLEMENT PLANNER</h1>
+
+            <p>
+                Set your current weight, target weight and timeline.
+                ALGOFIT calculates the required gain rate and creates
+                a supplement reference plan around your goal.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
+             COMPONENT A
+        ========================== -->
+
+        <section id="planner" class="glass section-card">
+
+            <div class="section-title">
+
+                <div class="section-number">01</div>
+
+                <div>
+                    <h2>Weight & Timeline Goal Setup</h2>
+                    <p>Configure your target before viewing recommendations.</p>
+                </div>
+
+            </div>
+
+
+            <!-- Inputs -->
+
+            <div class="input-grid">
+
+                <div class="field">
+
+                    <label for="currentWeight">
+                        CURRENT WEIGHT
+                    </label>
+
+                    <div class="input-wrap">
+
+                        <input
+                            type="number"
+                            id="currentWeight"
+                            min="20"
+                            max="300"
+                            step="0.1"
+                            value="82"
+                        >
+
+                        <span class="unit">KG</span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="targetWeight">
+                        TARGET WEIGHT
+                    </label>
+
+                    <div class="input-wrap">
+
+                        <input
+                            type="number"
+                            id="targetWeight"
+                            min="20"
+                            max="300"
+                            step="0.1"
+                            value="88"
+                        >
+
+                        <span class="unit">KG</span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Timeline -->
+
+            <div class="timeline">
+
+                <div class="timeline-label">
+                    SELECT TARGET TIMELINE
+                </div>
+
+                <div class="timeline-buttons">
+
+                    <button class="timeline-btn" data-days="15">
+                        <strong>15</strong>
+                        <span>DAYS</span>
+                    </button>
+
+                    <button class="timeline-btn active" data-days="30">
+                        <strong>30</strong>
+                        <span>DAYS</span>
+                    </button>
+
+                    <button class="timeline-btn" data-days="45">
+                        <strong>45</strong>
+                        <span>DAYS</span>
+                    </button>
+
+                    <button class="timeline-btn" data-days="60">
+                        <strong>60</strong>
+                        <span>DAYS</span>
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Statistics -->
+
+            <div class="stats-grid">
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Time To Target
+                    </div>
+
+                    <div class="stat-value" id="timeTarget">
+                        ~30 Days
+                    </div>
+
+                    <div class="stat-description">
+                        Selected timeline
+                    </div>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Predicted Gain Rate
+                    </div>
+
+                    <div class="stat-value" id="gainRate">
+                        +0.200 kg/day
+                    </div>
+
+                    <div class="stat-description">
+                        Target gain ÷ days
+                    </div>
+
+                </div>
+
+
+                <div class="stat-box">
+
+                    <div class="stat-label">
+                        Estimated Surplus
+                    </div>
+
+                    <div class="stat-value" id="calorieSurplus">
+                        +1540 kcal/day
+                    </div>
+
+                    <div class="stat-description">
+                        Simplified energy estimate
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             COMPONENT B
+        ========================== -->
+
+        <section id="recommendations" class="glass section-card">
+
+            <div class="section-title">
+
+                <div class="section-number">02</div>
+
+                <div>
+                    <h2>Dynamic Supplement Recommendations</h2>
+                    <p id="recommendationSubtitle">
+                        Recommendations update automatically with your goal.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div
+                id="recommendationGrid"
+                class="recommendations"
+            ></div>
+
+        </section>
+
+
+        <!-- =========================
+             COMPONENT C
+        ========================== -->
+
+        <section id="directory" class="glass section-card">
+
+            <div class="section-title">
+
+                <div class="section-number">03</div>
+
+                <div>
+                    <h2>Master Supplement Directory</h2>
+                    <p>
+                        Browse the complete powder reference database.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Search -->
+
+            <div class="directory-toolbar">
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search"
+                    placeholder="Search supplements... e.g. whey, creatine, oat"
+                >
+
+                <div class="filter-buttons">
+
+                    <button
+                        class="filter-btn active"
+                        data-filter="all"
+                    >
+                        ALL
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="direct"
+                    >
+                        DIRECT GAIN
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="indirect"
+                    >
+                        INDIRECT
+                    </button>
+
+                    <button
+                        class="filter-btn"
+                        data-filter="performance"
+                    >
+                        PERFORMANCE
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div id="directoryList" class="directory-list"></div>
+
+        </section>
+
+
+        <!-- =========================
+             NOTICE
+        ========================== -->
+
+        <div class="notice">
+
+            <strong>ALGOFIT Planner Note:</strong>
+
+            This dashboard uses simplified calculations for educational
+            planning. A powder is not automatically necessary for weight gain.
+            Total food intake, protein intake, resistance training, sleep and
+            overall nutrition matter more than selecting a particular powder.
+            Commercial supplements can also vary substantially in ingredients
+            and serving sizes, so always check the actual product label.
+
+        </div>
+
+    </main>
+
+
+    <footer>
+        Built for <span>ALGOFIT</span> • Weight Gain & Supplementation Planner
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+   <script>
+
+/* =========================================================
+   ALGOFIT WEIGHT GAIN PLANNER
+   DYNAMIC SUPPLEMENT LOGIC
+========================================================= */
+
+
+/* =========================================================
+   1. SUPPLEMENT DATABASE
+========================================================= */
+
+const supplements = [
+
+    {
+        id: 1,
+        name: "Mass Gainer",
+        category: "Direct Weight Gainer",
+        filter: "direct",
+        icon: "🥤",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "High-calorie combination of carbohydrates and protein.",
+        usage: "Useful when normal food intake is not enough to meet calorie needs.",
+        macros: [55, 25, 20]
+    },
+
+    {
+        id: 2,
+        name: "Whey Protein Concentrate",
+        category: "Protein",
+        filter: "indirect",
+        icon: "🥛",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Convenient complete protein source.",
+        usage: "Use to help meet your daily protein target.",
+        macros: [8, 75, 17]
+    },
+
+    {
+        id: 3,
+        name: "Whey Protein Isolate",
+        category: "Protein",
+        filter: "indirect",
+        icon: "⚡",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "High-protein whey option with relatively little carbohydrate and fat.",
+        usage: "Convenient protein source around meals or training.",
+        macros: [5, 85, 10]
+    },
+
+    {
+        id: 4,
+        name: "Whey Protein Hydrolysate",
+        category: "Protein",
+        filter: "indirect",
+        icon: "🔬",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Partially hydrolyzed whey protein.",
+        usage: "Convenient protein option.",
+        macros: [5, 85, 10]
+    },
+
+    {
+        id: 5,
+        name: "Casein Protein",
+        category: "Protein",
+        filter: "indirect",
+        icon: "🌙",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Slow-digesting dairy protein.",
+        usage: "Can be used between meals or before sleep.",
+        macros: [5, 80, 15]
+    },
+
+    {
+        id: 6,
+        name: "Milk Protein Blend",
+        category: "Protein",
+        filter: "indirect",
+        icon: "🥛",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Combination of whey and casein protein.",
+        usage: "Provides a mixture of faster and slower proteins.",
+        macros: [7, 78, 15]
+    },
+
+    {
+        id: 7,
+        name: "Maltodextrin",
+        category: "Carbohydrate",
+        filter: "direct",
+        icon: "⚡",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "Carbohydrate powder used to increase carbohydrate intake.",
+        usage: "Can be added to shakes when extra carbohydrates are needed.",
+        macros: [95, 0, 5]
+    },
+
+    {
+        id: 8,
+        name: "Dextrose",
+        category: "Carbohydrate",
+        filter: "direct",
+        icon: "🔋",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "Rapidly available carbohydrate powder.",
+        usage: "Adds carbohydrates and calories to drinks.",
+        macros: [96, 0, 4]
+    },
+
+    {
+        id: 9,
+        name: "Oat Powder",
+        category: "Carbohydrate",
+        filter: "direct",
+        icon: "🌾",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "Ground oats providing carbohydrates, calories and some protein.",
+        usage: "Easy addition to shakes, smoothies or meals.",
+        macros: [65, 15, 20]
+    },
+
+    {
+        id: 10,
+        name: "Meal Replacement Powder",
+        category: "Meal Replacement",
+        filter: "direct",
+        icon: "🍽️",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "Powder containing calories and multiple macronutrients.",
+        usage: "Convenient option when preparing a normal meal is difficult.",
+        macros: [45, 30, 25]
+    },
+
+    {
+        id: 11,
+        name: "Soy Protein",
+        category: "Plant Protein",
+        filter: "indirect",
+        icon: "🌱",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Plant-based protein derived from soy.",
+        usage: "Useful for increasing protein intake without dairy.",
+        macros: [10, 75, 15]
+    },
+
+    {
+        id: 12,
+        name: "Pea Protein",
+        category: "Plant Protein",
+        filter: "indirect",
+        icon: "🫛",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Plant-based protein made from peas.",
+        usage: "Vegetarian or vegan protein option.",
+        macros: [10, 75, 15]
+    },
+
+    {
+        id: 13,
+        name: "Rice Protein",
+        category: "Plant Protein",
+        filter: "indirect",
+        icon: "🍚",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Plant-based protein derived from rice.",
+        usage: "Can be combined with other plant proteins.",
+        macros: [10, 75, 15]
+    },
+
+    {
+        id: 14,
+        name: "Hemp Protein",
+        category: "Plant Protein",
+        filter: "indirect",
+        icon: "🌿",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Plant protein containing protein and fats.",
+        usage: "Can be added to smoothies or meals.",
+        macros: [20, 50, 30]
+    },
+
+    {
+        id: 15,
+        name: "Plant Protein Blend",
+        category: "Plant Protein",
+        filter: "indirect",
+        icon: "🌱",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Blend of plant proteins such as pea and rice.",
+        usage: "Convenient plant-based protein source.",
+        macros: [10, 75, 15]
+    },
+
+    {
+        id: 16,
+        name: "Creatine Monohydrate",
+        category: "Performance",
+        filter: "performance",
+        icon: "💪",
+        effect: "Performance Support",
+        badge: "❌ Support Only",
+        description: "Performance supplement used with resistance training.",
+        usage: "Used consistently according to the product directions.",
+        macros: [0, 0, 0]
+    },
+
+    {
+        id: 17,
+        name: "EAA Powder",
+        category: "Performance",
+        filter: "performance",
+        icon: "🧬",
+        effect: "Performance Support",
+        badge: "❌ Support Only",
+        description: "Provides essential amino acids.",
+        usage: "Optional amino-acid supplementation.",
+        macros: [0, 100, 0]
+    },
+
+    {
+        id: 18,
+        name: "BCAA Powder",
+        category: "Performance",
+        filter: "performance",
+        icon: "⚙️",
+        effect: "Performance Support",
+        badge: "❌ Support Only",
+        description: "Provides branched-chain amino acids.",
+        usage: "Used in some sports nutrition routines.",
+        macros: [0, 100, 0]
+    },
+
+    {
+        id: 19,
+        name: "Glutamine Powder",
+        category: "Performance",
+        filter: "performance",
+        icon: "🧪",
+        effect: "Performance Support",
+        badge: "❌ Support Only",
+        description: "Amino-acid supplement found in sports nutrition products.",
+        usage: "Optional supplement used by some athletes.",
+        macros: [0, 100, 0]
+    },
+
+    {
+        id: 20,
+        name: "Pre-Workout Powder",
+        category: "Performance",
+        filter: "performance",
+        icon: "🚀",
+        effect: "Performance Support",
+        badge: "❌ Support Only",
+        description: "Multi-ingredient product designed to support training energy and focus.",
+        usage: "Use according to the product label.",
+        macros: [0, 0, 0]
+    },
+
+    {
+        id: 21,
+        name: "Recovery Drink Mix",
+        category: "Recovery",
+        filter: "indirect",
+        icon: "💧",
+        effect: "Indirect Weight Gain",
+        badge: "🟡 Indirectly",
+        description: "Combination of carbohydrates and/or protein for convenient recovery nutrition.",
+        usage: "Can be used after training when convenient.",
+        macros: [50, 35, 15]
+    },
+
+    {
+        id: 22,
+        name: "High-Calorie Oat Shake",
+        category: "Calorie Supplement",
+        filter: "direct",
+        icon: "🥣",
+        effect: "Direct Weight Gain",
+        badge: "✅ Yes (Direct)",
+        description: "Oat-based calorie shake option.",
+        usage: "Can be combined with milk or another protein source.",
+        macros: [60, 20, 20]
+    }
+
+];
+
+
+/* =========================================================
+   2. APPLICATION STATE
+========================================================= */
+
+let selectedDays = 30;
+
+let activeFilter = "all";
+
+let searchTerm = "";
+
+let macroCharts = {};
+
+
+/* =========================================================
+   3. DOM ELEMENTS
+========================================================= */
+
+const currentWeightInput =
+    document.getElementById("currentWeight");
+
+const targetWeightInput =
+    document.getElementById("targetWeight");
+
+const timeTarget =
+    document.getElementById("timeTarget");
+
+const gainRate =
+    document.getElementById("gainRate");
+
+const calorieSurplus =
+    document.getElementById("calorieSurplus");
+
+const recommendationGrid =
+    document.getElementById("recommendationGrid");
+
+const recommendationSubtitle =
+    document.getElementById("recommendationSubtitle");
+
+const directoryList =
+    document.getElementById("directoryList");
+
+const searchInput =
+    document.getElementById("searchInput");
+
+
+/* =========================================================
+   4. BASIC CALCULATIONS
+========================================================= */
+
+function calculateWeightDifference(current, target) {
+
+    return target - current;
+
+}
+
+
+function calculateDailyGain(current, target, days) {
+
+    const difference =
+        calculateWeightDifference(
+            current,
+            target
+        );
+
+    return difference / days;
+
+}
+
+
+function calculateSurplus(dailyGain) {
+
+    if (dailyGain <= 0) {
+        return 0;
+    }
+
+    /*
+        Simplified estimate:
+        approximately 7,700 kcal per kg.
+
+        This is only a planning estimate.
+    */
+
+    return dailyGain * 7700;
+
+}
+
+
+function formatNumber(value, decimals = 2) {
+
+    return Number(value).toFixed(decimals);
+
+}
+
+
+/* =========================================================
+   5. NEW DYNAMIC PLAN TYPE LOGIC
+========================================================= */
+
+/*
+    IMPORTANT:
+
+    The recommendation is now based on:
+
+    A. TOTAL WEIGHT DIFFERENCE
+    B. DAILY GAIN RATE
+    C. TIMELINE
+
+    Therefore changing either target weight OR timeline
+    can change the recommendation.
+*/
+
+
+function determinePlanType(
+    weightDifference,
+    dailyRate,
+    days
+) {
+
+    /* -----------------------------------------
+       Target is not above current weight
+    ----------------------------------------- */
+
+    if (weightDifference <= 0) {
+
+        return {
+            type: "maintenance",
+            title: "No Weight Gain Required",
+            color: "blue"
+        };
+
+    }
+
+
+    /* -----------------------------------------
+       Very small total gain
+       Example:
+       82 → 82.5 kg
+       82 → 83 kg
+    ----------------------------------------- */
+
+    if (
+        weightDifference < 1 &&
+        dailyRate < 0.05
+    ) {
+
+        return {
+            type: "light",
+            title: "Light Gain Plan",
+            color: "blue"
+        };
+
+    }
+
+
+    /* -----------------------------------------
+       Lean gain
+       Example:
+       82 → 84 kg in 60 days
+    ----------------------------------------- */
+
+    if (
+        dailyRate < 0.05 &&
+        weightDifference < 3
+    ) {
+
+        return {
+            type: "lean",
+            title: "Lean Gain Plan",
+            color: "green"
+        };
+
+    }
+
+
+    /* -----------------------------------------
+       Moderate gain
+    ----------------------------------------- */
+
+    if (
+        dailyRate >= 0.05 &&
+        dailyRate < 0.10
+    ) {
+
+        return {
+            type: "moderate",
+            title: "Moderate Gain Plan",
+            color: "cyan"
+        };
+
+    }
+
+
+    /* -----------------------------------------
+       High gain
+    ----------------------------------------- */
+
+    if (
+        dailyRate >= 0.10 &&
+        dailyRate <= 0.15
+    ) {
+
+        return {
+            type: "high",
+            title: "High Gain Plan",
+            color: "yellow"
+        };
+
+    }
+
+
+    /* -----------------------------------------
+       Aggressive gain
+    ----------------------------------------- */
+
+    if (
+        dailyRate > 0.15
+    ) {
+
+        return {
+            type: "aggressive",
+            title: "Aggressive Gain Plan",
+            color: "red"
+        };
+
+    }
+
+
+    return {
+        type: "moderate",
+        title: "Moderate Gain Plan",
+        color: "cyan"
+    };
+
+}
+
+
+/* =========================================================
+   6. FIND SUPPLEMENT
+========================================================= */
+
+function findSupplement(name) {
+
+    return supplements.find(
+        item => item.name === name
+    );
+
+}
+
+
+/* =========================================================
+   7. DYNAMIC RECOMMENDATION ENGINE
+========================================================= */
+
+function getRecommendations(planType) {
+
+    /*
+        Every plan type now has a DIFFERENT set
+        of recommendations.
+    */
+
+
+    /* -----------------------------------------
+       LIGHT
+    ----------------------------------------- */
+
+    if (planType === "light") {
+
+        return [
+
+            {
+                ...findSupplement(
+                    "Whey Protein Isolate"
+                ),
+
+                usageOverride:
+                    "Use only if your normal diet does not provide enough protein."
+            },
+
+            {
+                ...findSupplement(
+                    "Casein Protein"
+                ),
+
+                usageOverride:
+                    "Optional slow-digesting protein source for convenient protein intake."
+            },
+
+            {
+                ...findSupplement(
+                    "Plant Protein Blend"
+                ),
+
+                usageOverride:
+                    "Alternative option if you prefer a plant-based protein source."
+            }
+
+        ];
+
+    }
+
+
+    /* -----------------------------------------
+       LEAN
+    ----------------------------------------- */
+
+    if (planType === "lean") {
+
+        return [
+
+            {
+                ...findSupplement(
+                    "Whey Protein Isolate"
+                ),
+
+                usageOverride:
+                    "Use to help reach your daily protein target when food alone is inconvenient."
+            },
+
+            {
+                ...findSupplement(
+                    "Oat Powder"
+                ),
+
+                usageOverride:
+                    "Add to a shake or meal when additional calories are required."
+            },
+
+            {
+                ...findSupplement(
+                    "Casein Protein"
+                ),
+
+                usageOverride:
+                    "Optional slower protein source between meals or before sleep."
+            }
+
+        ];
+
+    }
+
+
+    /* -----------------------------------------
+       MODERATE
+    ----------------------------------------- */
+
+    if (planType === "moderate") {
+
+        return [
+
+            {
+                ...findSupplement(
+                    "Whey Protein Concentrate"
+                ),
+
+                usageOverride:
+                    "Convenient protein source to help meet daily protein needs."
+            },
+
+            {
+                ...findSupplement(
+                    "Oat Powder"
+                ),
+
+                usageOverride:
+                    "Add carbohydrates and calories to meals or shakes."
+            },
+
+            {
+                ...findSupplement(
+                    "Creatine Monohydrate"
+                ),
+
+                usageOverride:
+                    "Performance supplement that can complement resistance training."
+            }
+
+        ];
+
+    }
+
+
+    /* -----------------------------------------
+       HIGH
+    ----------------------------------------- */
+
+    if (planType === "high") {
+
+        return [
+
+            {
+                ...findSupplement(
+                    "Mass Gainer"
+                ),
+
+                usageOverride:
+                    "Calorie-dense option when normal food intake is difficult to increase."
+            },
+
+            {
+                ...findSupplement(
+                    "Whey Protein Concentrate"
+                ),
+
+                usageOverride:
+                    "Use as a convenient protein source alongside normal meals."
+            },
+
+            {
+                ...findSupplement(
+                    "Oat Powder"
+                ),
+
+                usageOverride:
+                    "Useful for increasing carbohydrate and calorie intake through shakes or meals."
+            }
+
+        ];
+
+    }
+
+
+    /* -----------------------------------------
+       AGGRESSIVE
+    ----------------------------------------- */
+
+    if (planType === "aggressive") {
+
+        return [
+
+            {
+                ...findSupplement(
+                    "Mass Gainer"
+                ),
+
+                usageOverride:
+                    "High-calorie option for situations where reaching calorie intake through food is difficult."
+            },
+
+            {
+                ...findSupplement(
+                    "Meal Replacement Powder"
+                ),
+
+                usageOverride:
+                    "Convenient calorie and protein source when a normal meal is unavailable."
+            },
+
+            {
+                ...findSupplement(
+                    "Maltodextrin"
+                ),
+
+                usageOverride:
+                    "Concentrated carbohydrate option; use carefully because it adds calories quickly."
+            }
+
+        ];
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   8. PLAN DESCRIPTION
+========================================================= */
+
+function getPlanDescription(
+    planType,
+    weightDifference,
+    dailyRate,
+    days
+) {
+
+    const gain =
+        formatNumber(
+            weightDifference,
+            1
+        );
+
+    const rate =
+        formatNumber(
+            dailyRate,
+            3
+        );
+
+
+    if (planType === "light") {
+
+        return `
+            Target difference: <strong>${gain} kg</strong>.
+            This is a small planned increase, so the system focuses
+            mainly on protein-support options rather than high-calorie
+            gainers.
+        `;
+
+    }
+
+
+    if (planType === "lean") {
+
+        return `
+            Target difference: <strong>${gain} kg</strong>
+            at approximately <strong>${rate} kg/day</strong>.
+            The plan emphasizes protein plus moderate calorie support.
+        `;
+
+    }
+
+
+    if (planType === "moderate") {
+
+        return `
+            Target difference: <strong>${gain} kg</strong>
+            at approximately <strong>${rate} kg/day</strong>.
+            The plan combines protein, calorie support and training support.
+        `;
+
+    }
+
+
+    if (planType === "high") {
+
+        return `
+            Target difference: <strong>${gain} kg</strong>
+            requires approximately <strong>${rate} kg/day</strong>.
+            Calorie-dense options become more prominent.
+        `;
+
+    }
+
+
+    if (planType === "aggressive") {
+
+        return `
+            Target difference: <strong>${gain} kg</strong>
+            requires approximately <strong>${rate} kg/day</strong>.
+            The requested timeline creates a high required gain rate,
+            so calorie-dense options are highlighted.
+        `;
+
+    }
+
+
+    return `
+        Your target weight is not above your current weight.
+    `;
+
+}
+
+
+/* =========================================================
+   9. CHART CREATOR
+========================================================= */
+
+function createMacroChart(
+    canvasId,
+    macros
+) {
+
+    const canvas =
+        document.getElementById(canvasId);
+
+    if (!canvas) {
+        return;
+    }
+
+
+    if (macroCharts[canvasId]) {
+
+        macroCharts[canvasId].destroy();
+
+    }
+
+
+    const ctx =
+        canvas.getContext("2d");
+
+
+    macroCharts[canvasId] =
+        new Chart(
+            ctx,
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+                        "Carbs",
+                        "Protein",
+                        "Fats"
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            data: macros,
+
+                            backgroundColor: [
+                                "#00F2FE",
+                                "#00FF87",
+                                "#3B82F6"
+                            ],
+
+                            borderColor: "#101722",
+
+                            borderWidth: 3,
+
+                            hoverOffset: 5
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: "70%",
+
+                    plugins: {
+
+                        legend: {
+                            display: false
+                        },
+
+                        tooltip: {
+
+                            callbacks: {
+
+                                label: function(context) {
+
+                                    return (
+                                        context.label +
+                                        ": " +
+                                        context.raw +
+                                        "%"
+                                    );
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   10. CREATE RECOMMENDATION CARD
+========================================================= */
+
+function createRecommendationCard(
+    supplement,
+    index
+) {
+
+    const chartId =
+        `macroChart_${supplement.id}_${index}`;
+
+
+    let badgeClass =
+        "performance";
+
+
+    if (
+        supplement.filter === "direct"
+    ) {
+
+        badgeClass = "direct";
+
+    }
+
+
+    if (
+        supplement.filter === "indirect"
+    ) {
+
+        badgeClass = "indirect";
+
+    }
+
+
+    return `
+
+        <article class="recommend-card fade-in">
+
+            <div class="recommend-top">
+
+                <div>
+
+                    <div class="category">
+                        ${supplement.category}
+                    </div>
+
+                    <div class="product-title">
+                        ${supplement.name}
+                    </div>
+
+                </div>
+
+                <div class="product-icon">
+                    ${supplement.icon}
+                </div>
+
+            </div>
+
+
+            <div class="badge ${badgeClass}">
+                ${supplement.badge}
+            </div>
+
+
+            <p class="usage">
+                ${supplement.description}
+            </p>
+
+
+            <p class="usage">
+
+                <strong>Usage:</strong>
+
+                ${
+                    supplement.usageOverride ||
+                    supplement.usage
+                }
+
+            </p>
+
+
+            <div class="macro-area">
+
+                <div class="chart-holder">
+
+                    <canvas
+                        id="${chartId}"
+                    ></canvas>
+
+                </div>
+
+
+                <div class="macro-legend">
+
+                    <div class="macro-item">
+
+                        <div class="macro-left">
+
+                            <span
+                                class="dot"
+                                style="background:#00F2FE"
+                            ></span>
+
+                            Carbs
+
+                        </div>
+
+                        <strong>
+                            ${supplement.macros[0]}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="macro-item">
+
+                        <div class="macro-left">
+
+                            <span
+                                class="dot"
+                                style="background:#00FF87"
+                            ></span>
+
+                            Protein
+
+                        </div>
+
+                        <strong>
+                            ${supplement.macros[1]}%
+                        </strong>
+
+                    </div>
+
+
+                    <div class="macro-item">
+
+                        <div class="macro-left">
+
+                            <span
+                                class="dot"
+                                style="background:#3B82F6"
+                            ></span>
+
+                            Fats
+
+                        </div>
+
+                        <strong>
+                            ${supplement.macros[2]}%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* =========================================================
+   11. RENDER DYNAMIC RECOMMENDATIONS
+========================================================= */
+
+function renderRecommendations(
+    plan,
+    weightDifference,
+    dailyRate,
+    days
+) {
+
+    recommendationGrid.innerHTML = "";
+
+
+    /* -----------------------------------------
+       NO GAIN
+    ----------------------------------------- */
+
+    if (
+        plan.type === "maintenance"
+    ) {
+
+        recommendationSubtitle.innerHTML = `
+            Your target weight is equal to or below
+            your current weight.
+        `;
+
+
+        recommendationGrid.innerHTML = `
+
+            <div
+                class="recommend-card fade-in"
+                style="grid-column:1/-1"
+            >
+
+                <div class="recommend-top">
+
+                    <div>
+
+                        <div class="category">
+                            TARGET STATUS
+                        </div>
+
+                        <div class="product-title">
+                            No Weight Gain Required
+                        </div>
+
+                    </div>
+
+                    <div class="product-icon">
+                        🎯
+                    </div>
+
+                </div>
+
+
+                <p class="usage">
+
+                    Current weight:
+                    <strong>
+                        ${formatNumber(
+                            parseFloat(
+                                currentWeightInput.value
+                            ),
+                            1
+                        )} kg
+                    </strong>
+
+                    <br><br>
+
+                    Target weight:
+                    <strong>
+                        ${formatNumber(
+                            parseFloat(
+                                targetWeightInput.value
+                            ),
+                            1
+                        )} kg
+                    </strong>
+
+                    <br><br>
+
+                    Increase your target weight if you
+                    want to use the weight-gain planner.
+
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    /* -----------------------------------------
+       GET NEW RECOMMENDATIONS
+    ----------------------------------------- */
+
+    const recommendations =
+        getRecommendations(
+            plan.type
+        );
+
+
+    /* -----------------------------------------
+       UPDATE HEADER
+    ----------------------------------------- */
+
+    recommendationSubtitle.innerHTML = `
+
+        <strong style="color:#00F2FE">
+            ${plan.title}
+        </strong>
+
+        • You want to gain
+
+        <strong style="color:#00FF87">
+            ${formatNumber(
+                weightDifference,
+                1
+            )} kg
+        </strong>
+
+        in
+
+        <strong style="color:#00F2FE">
+            ${days} days
+        </strong>
+
+        (${formatNumber(
+            dailyRate,
+            3
+        )} kg/day).
+
+    `;
+
+
+    /* -----------------------------------------
+       CREATE CARDS
+    ----------------------------------------- */
+
+    recommendations.forEach(
+        (supplement, index) => {
+
+            recommendationGrid.innerHTML +=
+
+                createRecommendationCard(
+                    supplement,
+                    index
+                );
+
+        }
+    );
+
+
+    /* -----------------------------------------
+       CREATE CHARTS
+    ----------------------------------------- */
+
+    recommendations.forEach(
+        (supplement, index) => {
+
+            setTimeout(
+                () => {
+
+                    createMacroChart(
+
+                        `macroChart_${supplement.id}_${index}`,
+
+                        supplement.macros
+
+                    );
+
+                },
+
+                50
+
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   12. MAIN PLANNER FUNCTION
+========================================================= */
+
+function calculatePlanner() {
+
+    let current =
+        parseFloat(
+            currentWeightInput.value
+        );
+
+
+    let target =
+        parseFloat(
+            targetWeightInput.value
+        );
+
+
+    /* -----------------------------------------
+       VALIDATION
+    ----------------------------------------- */
+
+    if (
+        isNaN(current) ||
+        current < 20
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        isNaN(target) ||
+        target < 20
+    ) {
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------
+       WEIGHT DIFFERENCE
+    ----------------------------------------- */
+
+    const weightDifference =
+        calculateWeightDifference(
+            current,
+            target
+        );
+
+
+    /* -----------------------------------------
+       DAILY RATE
+    ----------------------------------------- */
+
+    const dailyRate =
+        calculateDailyGain(
+            current,
+            target,
+            selectedDays
+        );
+
+
+    /* -----------------------------------------
+       CALORIE SURPLUS
+    ----------------------------------------- */
+
+    const surplus =
+        calculateSurplus(
+            dailyRate
+        );
+
+
+    /* -----------------------------------------
+       UPDATE TOP STATS
+    ----------------------------------------- */
+
+    timeTarget.textContent =
+        `~${selectedDays} Days`;
+
+
+    if (
+        weightDifference > 0
+    ) {
+
+        gainRate.textContent =
+            `+${formatNumber(
+                dailyRate,
+                3
+            )} kg/day`;
+
+    } else {
+
+        gainRate.textContent =
+            `${formatNumber(
+                dailyRate,
+                3
+            )} kg/day`;
+
+    }
+
+
+    if (
+        surplus > 0
+    ) {
+
+        calorieSurplus.textContent =
+            `+${Math.round(
+                surplus
+            ).toLocaleString()} kcal/day`;
+
+    } else {
+
+        calorieSurplus.textContent =
+            `0 kcal/day`;
+
+    }
+
+
+    /* -----------------------------------------
+       DETERMINE PLAN
+       USING BOTH DIFFERENCE + RATE
+    ----------------------------------------- */
+
+    const plan =
+        determinePlanType(
+            weightDifference,
+            dailyRate,
+            selectedDays
+        );
+
+
+    /* -----------------------------------------
+       UPDATE RECOMMENDATIONS
+    ----------------------------------------- */
+
+    renderRecommendations(
+
+        plan,
+
+        weightDifference,
+
+        dailyRate,
+
+        selectedDays
+
+    );
+
+}
+
+
+/* =========================================================
+   13. TIMELINE BUTTONS
+========================================================= */
+
+document
+    .querySelectorAll(".timeline-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                document
+                    .querySelectorAll(
+                        ".timeline-btn"
+                    )
+                    .forEach(btn => {
+
+                        btn.classList.remove(
+                            "active"
+                        );
+
+                    });
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                selectedDays =
+                    parseInt(
+                        this.dataset.days
+                    );
+
+
+                calculatePlanner();
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   14. REAL-TIME WEIGHT INPUT
+========================================================= */
+
+currentWeightInput.addEventListener(
+    "input",
+    calculatePlanner
+);
+
+
+targetWeightInput.addEventListener(
+    "input",
+    calculatePlanner
+);
+
+
+/* =========================================================
+   15. DIRECTORY
+========================================================= */
+
+function renderDirectory() {
+
+    directoryList.innerHTML = "";
+
+
+    const filtered =
+        supplements.filter(item => {
+
+            const text =
+                (
+                    item.name +
+                    " " +
+                    item.category +
+                    " " +
+                    item.description
+                ).toLowerCase();
+
+
+            const matchesSearch =
+                text.includes(
+                    searchTerm.toLowerCase()
+                );
+
+
+            const matchesFilter =
+                activeFilter === "all" ||
+                item.filter === activeFilter;
+
+
+            return (
+                matchesSearch &&
+                matchesFilter
+            );
+
+        });
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        directoryList.innerHTML = `
+
+            <div class="empty">
+                No supplements found.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    filtered.forEach(item => {
+
+        let badgeClass =
+            "performance";
+
+
+        if (
+            item.filter === "direct"
+        ) {
+
+            badgeClass = "direct";
+
+        }
+
+
+        if (
+            item.filter === "indirect"
+        ) {
+
+            badgeClass = "indirect";
+
+        }
+
+
+        directoryList.innerHTML += `
+
+            <div class="directory-row fade-in">
+
+                <div class="directory-name">
+
+                    ${item.icon}
+
+                    ${item.name}
+
+                </div>
+
+
+                <div class="directory-category">
+
+                    ${item.category}
+
+                </div>
+
+
+                <div class="directory-use">
+
+                    ${item.effect}
+
+                </div>
+
+
+                <div class="directory-badge">
+
+                    <span
+                        class="badge ${badgeClass}"
+                    >
+
+                        ${item.badge}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        `;
+
+    });
+
+}
+
+
+/* =========================================================
+   16. SEARCH
+========================================================= */
+
+searchInput.addEventListener(
+    "input",
+    function() {
+
+        searchTerm =
+            this.value.trim();
+
+        renderDirectory();
+
+    }
+);
+
+
+/* =========================================================
+   17. FILTER BUTTONS
+========================================================= */
+
+document
+    .querySelectorAll(".filter-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                document
+                    .querySelectorAll(
+                        ".filter-btn"
+                    )
+                    .forEach(btn => {
+
+                        btn.classList.remove(
+                            "active"
+                        );
+
+                    });
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                activeFilter =
+                    this.dataset.filter;
+
+
+                renderDirectory();
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   18. INITIAL LOAD
+========================================================= */
+
+renderDirectory();
+
+calculatePlanner();
+
+</script>
+
+</body>
+</html>
